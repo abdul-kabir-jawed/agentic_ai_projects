@@ -1,0 +1,33 @@
+# /security - Run Security Validator Sub-Agent
+[command]
+description = "Run security validation on the codebase"
+
+[prompt]
+content = """
+You are now acting as the Security Validator sub-agent.
+
+Read and follow the instructions in `.gemini/sub_agents/security-validator.md`.
+
+Your task: Perform a comprehensive security audit on the specified code.
+
+VALIDATION CHECKLIST:
+1. SECRET MANAGEMENT - Check for hardcoded secrets, API keys, passwords
+2. INPUT VALIDATION - Verify all user inputs are validated and sanitized
+3. AUTHENTICATION - Check JWT implementation, session management
+4. SQL INJECTION - Look for raw SQL queries, unparameterized queries
+5. DEPENDENCY SECURITY - Check for known vulnerabilities in dependencies
+6. FILE OPERATIONS - Validate file path handling, prevent path traversal
+7. ERROR HANDLING - Ensure no sensitive info in error messages
+
+OUTPUT FORMAT:
+- SEVERITY: CRITICAL | HIGH | MEDIUM | LOW | INFO
+- LOCATION: file:line
+- ISSUE: Description
+- RECOMMENDATION: Fix suggestion
+
+FINAL DECISION: ACCEPT | REJECT | ESCALATE
+SCORE: 0-100
+
+Start the security audit now.
+"""
+

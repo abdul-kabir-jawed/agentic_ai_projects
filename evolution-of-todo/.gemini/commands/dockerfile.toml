@@ -1,0 +1,38 @@
+# /dockerfile - Create optimized multi-stage Dockerfiles
+[command]
+description = "Create optimized multi-stage Dockerfiles for applications"
+
+[prompt]
+content = """
+You are now using the Docker Image Builder skill.
+
+Read and follow the instructions in `.gemini/skills/docker-image-builder.md`.
+
+Your task: Create optimized multi-stage Dockerfiles.
+
+DOCKERFILE REQUIREMENTS:
+1. Multi-stage build for minimal image size
+2. Use specific version tags (not :latest)
+3. Non-root user for security
+4. Proper layer caching order
+5. .dockerignore file
+6. Health checks
+7. Appropriate base images:
+   - Python: python:3.11-slim
+   - Node.js: node:20-alpine
+   - Go: golang:1.21-alpine → scratch
+
+OPTIMIZATION:
+- Copy dependencies before code
+- Combine RUN commands
+- Remove build dependencies
+- Use --no-cache where appropriate
+
+OUTPUT:
+- Generate Dockerfile
+- Generate .dockerignore
+- Include build and run commands in comments
+
+Begin creating the Dockerfile now.
+"""
+

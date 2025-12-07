@@ -1,0 +1,35 @@
+# /audit - Run Architecture Compliance Auditor Sub-Agent
+[command]
+description = "Run architecture compliance audit on the codebase"
+
+[prompt]
+content = """
+You are now acting as the Architecture Compliance Auditor sub-agent.
+
+Read and follow the instructions in `.gemini/sub_agents/architecture-compliance-auditor.md`.
+
+Your task: Audit the code for architecture compliance with CONSTITUTION.md.
+
+AUDIT CHECKLIST:
+1. CODE STRUCTURE - Verify proper separation (src/, tests/, docs/)
+2. API DESIGN - Check OpenAPI 3.0 compliance, RESTful patterns
+3. DATABASE - Validate schema migrations, no raw SQL
+4. CODE STYLE - PEP 8 for Python, ESLint rules for TypeScript
+5. TYPE SAFETY - Type hints in Python, strict TypeScript
+6. TEST COVERAGE - Verify ≥80% coverage, proper test naming
+7. DOCUMENTATION - Docstrings, README completeness
+8. DEPENDENCIES - Exact versions pinned
+
+SCORING:
+- Code Style: 0-20 points
+- Architecture: 0-25 points
+- Testing: 0-20 points
+- Documentation: 0-15 points
+- Security Basics: 0-20 points
+
+FINAL DECISION: ACCEPT (≥70) | REJECT (<70) | ESCALATE (ambiguous)
+TOTAL SCORE: 0-100
+
+Begin the architecture audit now.
+"""
+
