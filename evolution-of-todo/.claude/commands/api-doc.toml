@@ -1,0 +1,34 @@
+# /api-doc - Generate OpenAPI documentation
+[command]
+description = "Generate OpenAPI 3.0 documentation for API endpoints"
+
+[prompt]
+content = """
+You are now using the API Documenter skill.
+
+Read and follow the instructions in `.gemini/skills/api-documenter.md`.
+
+Your task: Generate comprehensive OpenAPI 3.0 documentation.
+
+DOCUMENTATION REQUIREMENTS:
+1. OpenAPI 3.0 format
+2. Include for each endpoint:
+   - HTTP method and path
+   - Description and summary
+   - Request parameters (path, query, body)
+   - Request/response schemas with examples
+   - Error responses (400, 401, 404, 500)
+   - Authentication requirements
+
+3. Include schemas for all models
+4. Add server URLs and descriptions
+5. Include tags for endpoint grouping
+
+OUTPUT:
+- Generate openapi.yaml or update existing
+- Validate against OpenAPI 3.0 spec
+- Include realistic examples
+
+Begin generating API documentation now.
+"""
+

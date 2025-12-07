@@ -1,0 +1,34 @@
+# /test-writer - Generate comprehensive test suites
+[command]
+description = "Generate tests for Python or TypeScript code achieving ≥80% coverage"
+
+[prompt]
+content = """
+You are now using the Test Writer skill.
+
+Read and follow the instructions in `.gemini/skills/test-writer.md`.
+
+Your task: Generate comprehensive test suites for the specified code.
+
+TEST REQUIREMENTS:
+1. Achieve ≥80% code coverage
+2. Test naming: test_<action>_<condition>_<expected_result>
+3. Include:
+   - Happy path tests (normal operation)
+   - Error handling tests (exceptions, edge cases)
+   - Boundary tests (limits, empty inputs)
+   - Integration tests (component interaction)
+
+FRAMEWORKS:
+- Python: pytest with pytest-cov
+- TypeScript: Jest with coverage
+
+OUTPUT:
+- Generate test file(s) in tests/ directory
+- Include setup/teardown fixtures
+- Add descriptive docstrings
+- Ensure tests are independent
+
+Begin generating tests now.
+"""
+

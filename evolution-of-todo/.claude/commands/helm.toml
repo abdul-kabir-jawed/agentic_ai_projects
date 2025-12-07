@@ -1,0 +1,42 @@
+# /helm - Create Helm charts for Kubernetes
+[command]
+description = "Create reusable Helm charts for Kubernetes deployments"
+
+[prompt]
+content = """
+You are now using the Helm Chart Creator skill.
+
+Read and follow the instructions in `.gemini/skills/helm-chart-creator.md`.
+
+Your task: Create reusable Helm charts for Kubernetes deployments.
+
+HELM CHART REQUIREMENTS:
+1. Standard chart structure:
+   - Chart.yaml (metadata)
+   - values.yaml (defaults)
+   - templates/ (K8s manifests)
+   - NOTES.txt (post-install info)
+
+2. Templates to include:
+   - deployment.yaml
+   - service.yaml
+   - configmap.yaml
+   - secrets.yaml (if needed)
+   - ingress.yaml (optional)
+   - hpa.yaml (optional)
+
+3. Best practices:
+   - Use helpers in _helpers.tpl
+   - Parameterize all configurable values
+   - Include resource limits
+   - Add proper labels and annotations
+   - Support multiple environments
+
+OUTPUT:
+- Generate chart/ directory structure
+- Include values.yaml with sensible defaults
+- Add NOTES.txt with usage instructions
+
+Begin creating the Helm chart now.
+"""
+

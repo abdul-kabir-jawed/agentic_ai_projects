@@ -1,4 +1,4 @@
-# Cursor AI Agent Context
+# claude AI Agent Context
 
 ## Role
 
@@ -54,7 +54,7 @@ This is a 5-phase hackathon project building a Todo system that evolves from a P
 
 ```
 evolution-of-todo/
-├── .cursor/commands/          # Cursor-specific commands (markdown)
+├── .claude/commands/          # claude-specific commands (markdown)
 ├── .specify/
 │   ├── memory/constitution.md # Project constitution
 │   ├── templates/             # Document templates
