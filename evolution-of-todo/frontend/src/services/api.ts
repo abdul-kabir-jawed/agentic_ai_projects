@@ -69,6 +69,15 @@ class TaskAPI {
       ...filters,
     };
     const { data } = await this.client.get<TaskListResponse>('/tasks', { params });
+
+    // Normalize response: convert 'tasks' to 'items' if needed
+    if (data.tasks && !data.items) {
+      return {
+        ...data,
+        items: data.tasks,
+      };
+    }
+
     return data;
   }
 
@@ -116,14 +125,47 @@ class TaskAPI {
   }
 
   async uploadAvatar(file: File): Promise<UserProfile> {
-    const formData = new FormData();
-    formData.append('file', file);
-    const { data } = await this.client.post<UserProfile>('/auth/me/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    // Compress and resize image before uploading
+    const compressedBase64 = await this.compressImage(file, 200, 0.8);
+
+    const { data } = await this.client.post<UserProfile>('/auth/me/avatar', {
+      image_data: compressedBase64,
     });
     return data;
+  }
+
+  private async compressImage(file: File, maxSize: number, quality: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      img.onload = () => {
+        // Calculate new dimensions (max 200x200 for avatar)
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // Convert to compressed JPEG
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
   }
 
   async deleteAvatar(): Promise<UserProfile> {

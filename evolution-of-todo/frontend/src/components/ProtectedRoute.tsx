@@ -17,11 +17,11 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-void">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="w-12 h-12 border-3 border-amber-600/30 border-t-amber-500 rounded-full"
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+          className="w-10 h-10 border-2 border-gold/30 border-t-gold rounded-full"
         />
       </div>
     );

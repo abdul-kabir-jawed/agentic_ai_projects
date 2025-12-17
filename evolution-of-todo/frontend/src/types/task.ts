@@ -30,8 +30,10 @@ export interface TaskUpdateRequest {
 }
 
 export interface TaskListResponse {
-  items: Task[];
+  items?: Task[];
+  tasks?: Task[];
   total: number;
   page: number;
   page_size: number;
+  total_pages?: number;
 }

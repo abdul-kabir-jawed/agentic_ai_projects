@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from '@iconify/react';
 
 interface SearchBarProps {
@@ -11,10 +10,27 @@ interface SearchBarProps {
 
 export default function SearchBar({ onSearch, isLoading = false }: SearchBarProps) {
   const [query, setQuery] = useState('');
+  const debounceRef = useRef<NodeJS.Timeout>();
+
+  // Debounce search to reduce API calls
+  useEffect(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      onSearch(query);
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [query]);
 
   const handleChange = (value: string) => {
     setQuery(value);
-    onSearch(value);
   };
 
   return (

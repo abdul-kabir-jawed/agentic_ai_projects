@@ -1,22 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import { Icon } from '@iconify/react';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
-import TaskList from '@/components/TaskList';
+import TaskItem from '@/components/TaskItem';
 import TaskForm from '@/components/TaskForm';
-import SearchBar from '@/components/SearchBar';
-import FilterControls from '@/components/FilterControls';
-import SortControls from '@/components/SortControls';
-import FocusMode from '@/components/FocusMode';
-import ErrorBoundary from '@/components/ErrorBoundary';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import UserMenu from '@/components/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
-import { Task, TaskCreateRequest } from '@/types/task';
+import { Task, TaskCreateRequest, Priority } from '@/types/task';
 import { taskAPI } from '@/services/api';
 
 function HomeContent() {
@@ -25,56 +19,47 @@ function HomeContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
-  const [focusTask, setFocusTask] = useState<Task | null>(null);
-  const [isFocusModeActive, setIsFocusModeActive] = useState(false);
-  const [filters, setFilters] = useState({
-    search: '',
-    priority: undefined as string | undefined,
-    is_completed: undefined as boolean | undefined,
-  });
-  const [sort, setSort] = useState({
-    sort_by: 'created_at' as 'created_at' | 'due_date' | 'priority',
-    sort_order: 'desc' as 'asc' | 'desc',
-  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<Priority | 'all'>('all');
+  const [sortBy, setSortBy] = useState<'created_at' | 'due_date' | 'priority'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  useEffect(() => {
-    fetchTasks();
-  }, [filters, sort]);
-
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await taskAPI.getTasks(0, 100, {
-        search: filters.search || undefined,
-        priority: filters.priority,
-        is_completed: filters.is_completed,
-        sort_by: sort.sort_by,
-        sort_order: sort.sort_order,
+        search: searchQuery || undefined,
+        priority: activeFilter !== 'all' ? activeFilter : undefined,
+        sort_by: sortBy,
+        sort_order: sortOrder,
       });
-      setTasks(response.items);
+
+      if (Array.isArray(response?.items)) {
+        setTasks(response.items);
+      } else {
+        setTasks([]);
+      }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Failed to load tasks';
-      toast.error(errorMsg.includes('Network') ? 'Backend unavailable - check if server is running' : errorMsg);
+      setTasks([]);
+      toast.error('Failed to load tasks');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [searchQuery, activeFilter, sortBy, sortOrder]);
+
+  useEffect(() => {
+    const debounce = setTimeout(fetchTasks, 300);
+    return () => clearTimeout(debounce);
+  }, [fetchTasks]);
 
   const handleCreateTask = async (data: TaskCreateRequest) => {
     try {
       const newTask = await taskAPI.createTask(data);
       setTasks((prev) => [newTask, ...prev]);
       setShowForm(false);
-      toast.success(data.is_daily ? 'Daily task created! 📅' : 'Task created successfully!');
+      toast.success('Task created!');
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Failed to create task';
-      if (errorMsg.includes('Network') || errorMsg.includes('ECONNREFUSED')) {
-        toast.error('Backend unavailable - make sure the server is running on port 8000');
-      } else if (errorMsg.includes('400')) {
-        toast.error('Invalid task data - check your input');
-      } else {
-        toast.error(errorMsg);
-      }
+      toast.error('Failed to create task');
       throw error;
     }
   };
@@ -83,12 +68,10 @@ function HomeContent() {
     if (!editingTask) return;
     try {
       const updated = await taskAPI.updateTask(editingTask.id, data);
-      setTasks((prev) =>
-        prev.map((t) => (t.id === editingTask.id ? updated : t))
-      );
+      setTasks((prev) => prev.map((t) => (t.id === editingTask.id ? updated : t)));
       setEditingTask(undefined);
       setShowForm(false);
-      toast.success('Task updated successfully!');
+      toast.success('Task updated!');
     } catch (error) {
       toast.error('Failed to update task');
       throw error;
@@ -96,9 +79,10 @@ function HomeContent() {
   };
 
   const handleTaskUpdate = (updatedTask: Task) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === updatedTask.id ? updatedTask : t))
-    );
+    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
+    if (updatedTask.is_completed) {
+      toast.success('Task completed!');
+    }
   };
 
   const handleTaskDelete = (id: number) => {
@@ -111,167 +95,295 @@ function HomeContent() {
     setShowForm(true);
   };
 
-  const handleFormCancel = () => {
-    setShowForm(false);
-    setEditingTask(undefined);
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
+  const completedCount = safeTasks.filter((t) => t.is_completed).length;
+  const totalCount = safeTasks.length;
+  const highPriorityCount = safeTasks.filter((t) => t.priority === 'high' && !t.is_completed).length;
+
+  // Group tasks by priority and completion
+  const groupedTasks = {
+    high: safeTasks.filter((t) => t.priority === 'high' && !t.is_completed),
+    medium: safeTasks.filter((t) => t.priority === 'medium' && !t.is_completed),
+    low: safeTasks.filter((t) => t.priority === 'low' && !t.is_completed),
+    completed: safeTasks.filter((t) => t.is_completed),
   };
 
-  const completedCount = tasks.filter((t) => t.is_completed).length;
-  const totalCount = tasks.length;
-  const highPriorityCount = tasks.filter((t) => t.priority === 'high' && !t.is_completed).length;
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   return (
-    <ErrorBoundary>
-      <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden relative">
+    <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden relative">
       <Toaster position="bottom-right" />
 
-      {/* Cosmic Aurora Background */}
+      {/* Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-900/30 rounded-full blur-[120px] animate-aurora-1 mix-blend-screen"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-fuchsia-900/20 rounded-full blur-[100px] animate-aurora-2 mix-blend-screen"></div>
-        <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] bg-cyan-900/20 rounded-full blur-[90px] animate-pulse-glow mix-blend-screen"></div>
-        {/* Stars/Particles */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyIiBjeT0iMiIgcj0iMSIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-30"></div>
+        <div className="absolute top-[-10%] left-[10%] w-[500px] h-[500px] bg-gold/5 rounded-full blur-[150px] animate-pulse-slow" />
+        <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] bg-rose/5 rounded-full blur-[120px] animate-pulse-slow" />
       </div>
 
-      {/* Left Sidebar */}
+      {/* Sidebar */}
       <Sidebar completedCount={completedCount} totalCount={totalCount} />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden z-10 relative">
-        {/* Header & Search */}
+        {/* Header */}
         <header className="px-6 py-6 md:px-10 md:py-8 flex-shrink-0">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+            {/* Greeting */}
             <div>
-              <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium tracking-tight text-white mb-1">
-                Welcome, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400">{user?.username || 'Guest'}</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400 line-clamp-2">
-                {highPriorityCount > 0
-                  ? `You have ${highPriorityCount} high-priority task${highPriorityCount !== 1 ? 's' : ''} remaining.`
-                  : 'All caught up! Great work.'}
+              <motion.h1
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-3xl md:text-4xl font-serif font-medium text-text-primary mb-2"
+              >
+                {getGreeting()}, <span className="text-gradient-gold">{user?.username || 'there'}</span>
+              </motion.h1>
+              <p className="text-text-secondary text-sm">
+                {highPriorityCount > 0 ? (
+                  <>You have <span className="text-orange-400 font-medium">{highPriorityCount} urgent</span> {highPriorityCount === 1 ? 'task' : 'tasks'} to focus on.</>
+                ) : completedCount === totalCount && totalCount > 0 ? (
+                  <span className="text-gold">All tasks completed! Well done.</span>
+                ) : (
+                  'What will you accomplish today?'
+                )}
               </p>
             </div>
 
-            <div className="flex items-center gap-4">
-              <SearchBar
-                onSearch={(query) => setFilters((prev) => ({ ...prev, search: query }))}
-                isLoading={isLoading}
-              />
+            {/* Search */}
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Icon icon="lucide:search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search tasks..."
+                  className="w-64 bg-surface border border-white/10 rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all duration-300 pl-10 pr-4 py-2.5"
+                />
+              </div>
+            </div>
+          </div>
 
-              <button className="w-10 h-10 rounded-full glass-card flex items-center justify-center text-slate-300 hover:text-white relative">
-                <Icon icon="ic:outline-notifications" className="text-xl" />
-                {highPriorityCount > 0 && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-slate-900"></span>
-                )}
+          {/* Filters & Controls */}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {/* Filter Pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {(['all', 'high', 'medium', 'low'] as const).map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setActiveFilter(filter)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    activeFilter === filter
+                      ? filter === 'high'
+                        ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                        : filter === 'medium'
+                        ? 'bg-gold/20 text-gold border border-gold/30'
+                        : filter === 'low'
+                        ? 'bg-white/10 text-text-primary border border-white/20'
+                        : 'bg-gold/10 text-gold border border-gold/30'
+                      : 'bg-white/5 text-text-tertiary border border-white/5 hover:border-white/20'
+                  }`}
+                >
+                  {filter === 'all' ? 'All Tasks' : filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            {/* Sort Controls */}
+            <div className="flex items-center gap-2 ml-auto">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'created_at' | 'due_date' | 'priority')}
+                className="bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-text-secondary focus:outline-none focus:border-gold/50"
+              >
+                <option value="created_at">Date Created</option>
+                <option value="due_date">Due Date</option>
+                <option value="priority">Priority</option>
+              </select>
+              <button
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                className="p-2 rounded-lg border border-white/10 bg-surface hover:border-gold/30 transition-colors"
+              >
+                <Icon
+                  icon={sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'}
+                  className="w-4 h-4 text-text-secondary"
+                />
               </button>
             </div>
           </div>
-
-          {/* Filters & Sort */}
-          <div className="mt-8 flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex-1 min-w-fit">
-              <FilterControls
-                onFilterChange={(newFilters) => setFilters((prev) => ({ ...prev, ...newFilters }))}
-                isLoading={isLoading}
-              />
-            </div>
-            <div className="hidden lg:flex">
-              <SortControls
-                onSortChange={(newSort) => setSort(newSort)}
-                isLoading={isLoading}
-              />
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                const firstIncomplete = tasks.find((t) => !t.is_completed);
-                if (firstIncomplete) {
-                  setFocusTask(firstIncomplete);
-                  setIsFocusModeActive(true);
-                } else {
-                  toast.error('No incomplete tasks to focus on');
-                }
-              }}
-              disabled={isLoading}
-              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-all text-xs font-medium whitespace-nowrap"
-            >
-              <Icon icon="ic:outline-flash-on" className="w-4 h-4" />
-              Focus Mode
-            </motion.button>
-          </div>
         </header>
 
-        {/* Task List Container */}
-        <div className="flex-1 overflow-y-auto px-6 md:px-10 pb-20 md:pb-8 scroll-smooth">
-          {showForm ? (
-            <TaskForm
-              task={editingTask}
-              onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
-              onCancel={handleFormCancel}
-              isLoading={isLoading}
-            />
+        {/* Task List */}
+        <div className="flex-1 overflow-y-auto px-6 md:px-10 pb-24 md:pb-8">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="w-10 h-10 border-2 border-gold border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-text-tertiary text-sm">Loading tasks...</p>
+            </div>
+          ) : safeTasks.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center justify-center py-20 text-center"
+            >
+              <div className="w-20 h-20 rounded-full bg-gold/10 flex items-center justify-center mb-6">
+                <Icon icon="lucide:clipboard-list" className="w-10 h-10 text-gold" />
+              </div>
+              <h3 className="text-xl font-serif font-medium text-text-primary mb-2">
+                {searchQuery || activeFilter !== 'all' ? 'No tasks found' : 'No tasks yet'}
+              </h3>
+              <p className="text-text-tertiary text-sm mb-6 max-w-sm">
+                {searchQuery || activeFilter !== 'all'
+                  ? 'Try adjusting your filters or search query.'
+                  : 'Start by creating your first task to organize your day.'}
+              </p>
+              {!searchQuery && activeFilter === 'all' && (
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="btn-gold px-6 py-3 rounded-lg font-semibold text-deep flex items-center gap-2"
+                >
+                  <Icon icon="lucide:plus" className="w-4 h-4" />
+                  Create Task
+                </button>
+              )}
+            </motion.div>
           ) : (
-            <TaskList
-              tasks={tasks}
-              onUpdate={handleTaskUpdate}
-              onDelete={handleTaskDelete}
-              onEdit={handleEdit}
-              isLoading={isLoading}
-              emptyMessage={
-                filters.search || filters.priority !== undefined
-                  ? 'No tasks match your filters'
-                  : 'No tasks yet. Create one to get started!'
-              }
-            />
+            <div className="space-y-8">
+              {/* Urgent Tasks */}
+              {groupedTasks.high.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Icon icon="lucide:flame" className="w-5 h-5 text-orange-400" />
+                    <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider">Urgent</h2>
+                    <span className="text-xs text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full">{groupedTasks.high.length}</span>
+                  </div>
+                  <div className="space-y-3">
+                    <AnimatePresence>
+                      {groupedTasks.high.map((task) => (
+                        <TaskItem
+                          key={task.id}
+                          task={task}
+                          onUpdate={handleTaskUpdate}
+                          onDelete={handleTaskDelete}
+                          onEdit={handleEdit}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </section>
+              )}
+
+              {/* Important Tasks */}
+              {groupedTasks.medium.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Icon icon="lucide:zap" className="w-5 h-5 text-gold" />
+                    <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider">Important</h2>
+                    <span className="text-xs text-gold bg-gold/10 px-2 py-0.5 rounded-full">{groupedTasks.medium.length}</span>
+                  </div>
+                  <div className="space-y-3">
+                    <AnimatePresence>
+                      {groupedTasks.medium.map((task) => (
+                        <TaskItem
+                          key={task.id}
+                          task={task}
+                          onUpdate={handleTaskUpdate}
+                          onDelete={handleTaskDelete}
+                          onEdit={handleEdit}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </section>
+              )}
+
+              {/* Low Priority Tasks */}
+              {groupedTasks.low.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Icon icon="lucide:coffee" className="w-5 h-5 text-text-tertiary" />
+                    <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider">Later</h2>
+                    <span className="text-xs text-text-tertiary bg-white/5 px-2 py-0.5 rounded-full">{groupedTasks.low.length}</span>
+                  </div>
+                  <div className="space-y-3">
+                    <AnimatePresence>
+                      {groupedTasks.low.map((task) => (
+                        <TaskItem
+                          key={task.id}
+                          task={task}
+                          onUpdate={handleTaskUpdate}
+                          onDelete={handleTaskDelete}
+                          onEdit={handleEdit}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </section>
+              )}
+
+              {/* Completed Tasks */}
+              {groupedTasks.completed.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Icon icon="lucide:check-circle" className="w-5 h-5 text-green-500" />
+                    <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider">Completed</h2>
+                    <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">{groupedTasks.completed.length}</span>
+                  </div>
+                  <div className="space-y-3">
+                    <AnimatePresence>
+                      {groupedTasks.completed.map((task) => (
+                        <TaskItem
+                          key={task.id}
+                          task={task}
+                          onUpdate={handleTaskUpdate}
+                          onDelete={handleTaskDelete}
+                          onEdit={handleEdit}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </section>
+              )}
+            </div>
           )}
         </div>
 
-        {/* Desktop Add Task Button */}
-        <div className="hidden md:block absolute bottom-8 right-8 z-30">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              setEditingTask(undefined);
-              setShowForm(true);
-            }}
-            className="px-6 py-3 text-sm font-medium rounded-lg bg-gradient-to-r from-amber-600 to-yellow-600 text-white hover:shadow-lg hover:shadow-amber-500/40 transition-all flex items-center gap-2"
-          >
-            <Icon icon="ic:outline-add" className="w-4 h-4" />
-            New Task
-          </motion.button>
-        </div>
-
-        {/* Mobile Bottom Navigation */}
+        {/* Mobile Navigation */}
         <MobileNav />
       </main>
 
-      {/* Focus Mode Overlay */}
-      <FocusMode
-        task={focusTask}
-        isActive={isFocusModeActive}
-        onExit={() => setIsFocusModeActive(false)}
-      />
+      {/* Floating Action Button */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => {
+          setEditingTask(undefined);
+          setShowForm(true);
+        }}
+        className="fab"
+      >
+        <Icon icon="lucide:plus" className="w-6 h-6" />
+      </motion.button>
 
-      {/* Floating Add Task Button for Mobile/Tablet */}
-      <div className="fixed bottom-24 right-6 z-40 xl:hidden flex flex-col gap-4 items-end">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            setEditingTask(undefined);
-            setShowForm(true);
-          }}
-          className="md:hidden w-14 h-14 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-lg shadow-amber-500/40 flex items-center justify-center transition-transform group"
-          title="Add new task"
-        >
-          <Icon icon="ic:outline-add" className="w-6 h-6" />
-        </motion.button>
-      </div>
-      </div>
-    </ErrorBoundary>
+      {/* Task Form Modal */}
+      <AnimatePresence>
+        {showForm && (
+          <TaskForm
+            task={editingTask}
+            onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
+            onCancel={() => {
+              setShowForm(false);
+              setEditingTask(undefined);
+            }}
+            isLoading={isLoading}
+          />
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
