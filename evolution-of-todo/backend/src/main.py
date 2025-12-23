@@ -49,12 +49,20 @@ app.add_exception_handler(RateLimitExceeded, lambda request, exc: JSONResponse(
 
 # Configure CORS
 cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
-allowed_origins = [origin.strip() for origin in cors_origins.split(",")]
+
+# Handle wildcard CORS
+if cors_origins.strip() == "*":
+    # For wildcard CORS, we need to allow all origins
+    allowed_origins = ["*"]
+    allow_credentials = False  # Cannot use credentials with wildcard
+else:
+    allowed_origins = [origin.strip() for origin in cors_origins.split(",")]
+    allow_credentials = True
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_credentials=allow_credentials,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
 )
