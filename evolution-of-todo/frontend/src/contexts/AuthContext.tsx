@@ -24,9 +24,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Fallback to local backend if NEXT_PUBLIC_USE_LOCAL_AUTH is set
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
-const USE_LOCAL_AUTH = process.env.NEXT_PUBLIC_USE_LOCAL_AUTH === 'true';
+// Use local backend API by default
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+const API_BASE_PATH = process.env.NEXT_PUBLIC_API_BASE_PATH || '/api/v1';
+const API_URL = `${API_BASE}${API_BASE_PATH}`;
+const USE_LOCAL_AUTH = process.env.NEXT_PUBLIC_USE_LOCAL_AUTH !== 'false'; // Default to true
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

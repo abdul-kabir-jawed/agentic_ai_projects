@@ -28,7 +28,9 @@ interface UserStats {
   weekly_completion_rate: number;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+const API_BASE_PATH = process.env.NEXT_PUBLIC_API_BASE_PATH || '/api/v1';
+const API_URL = `${API_BASE}${API_BASE_PATH}`;
 
 class TaskAPI {
   private client: AxiosInstance;
