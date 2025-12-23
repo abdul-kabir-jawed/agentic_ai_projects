@@ -116,13 +116,22 @@ function HomeContent() {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden relative">
+    <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden relative bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
       <Toaster position="bottom-right" />
 
-      {/* Background Effects */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[10%] w-[500px] h-[500px] bg-gold/5 rounded-full blur-[150px] animate-pulse-slow" />
-        <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] bg-rose/5 rounded-full blur-[120px] animate-pulse-slow" />
+      {/* Background Effects - Enhanced Glassmorphism */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Primary accent glow - Cyan */}
+        <div className="absolute top-[5%] left-[5%] w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[180px] animate-pulse-slow" />
+
+        {/* Secondary accent glow - Purple */}
+        <div className="absolute bottom-[10%] right-[5%] w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[150px] animate-pulse-slow" />
+
+        {/* Tertiary accent glow - Orange */}
+        <div className="absolute top-[60%] right-[15%] w-[400px] h-[400px] bg-orange-500/4 rounded-full blur-[120px] animate-pulse-slow" />
+
+        {/* Grid overlay for depth */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml?utf8,<svg width=\"40\" height=\"40\" xmlns=\"http://www.w3.org/2000/svg\"><defs><pattern id=\"grid\" width=\"40\" height=\"40\" patternUnits=\"userSpaceOnUse\"><path d=\"M 40 0 L 0 0 0 40\" fill=\"none\" stroke=\"rgba(255,255,255,0.02)\" stroke-width=\"0.5\"/></pattern></defs><rect width=\"100%\" height=\"100%\" fill=\"url(%23grid)\"/></svg>')] opacity-20" />
       </div>
 
       {/* Sidebar */}
