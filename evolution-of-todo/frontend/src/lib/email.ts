@@ -7,24 +7,56 @@
  * - Welcome emails
  */
 
-// Email sending function (logs in development, sends in production)
+import nodemailer from "nodemailer";
+
+// Create reusable transporter object using SMTP transport
+const createTransporter = () => {
+  const host = process.env.EMAIL_HOST;
+  const port = parseInt(process.env.EMAIL_PORT || "587", 10);
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASS;
+
+  if (!host || !user || !pass) {
+    console.warn("[EMAIL] SMTP configuration missing - emails will be logged only");
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // true for 465, false for other ports
+    auth: {
+      user,
+      pass,
+    },
+  });
+};
+
+// Email sending function
 async function sendEmail(to: string, subject: string, html: string) {
-  // In development, just log the email
-  if (process.env.NODE_ENV === "development" || !process.env.SMTP_HOST) {
+  const transporter = createTransporter();
+  const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER || "noreply@evolutionoftodo.com";
+
+  // If no transporter (missing config), log the email
+  if (!transporter) {
     console.log(`[EMAIL] Would send to: ${to}`);
     console.log(`[EMAIL] Subject: ${subject}`);
     console.log(`[EMAIL] Body preview: ${html.substring(0, 200)}...`);
-    return { success: true, message: "Email logged (development mode)" };
+    return { success: true, message: "Email logged (no SMTP config)" };
   }
 
-  // In production, use your email service
-  // Example with nodemailer or any email API
   try {
-    // TODO: Implement actual email sending
-    console.log(`[EMAIL] Sending to: ${to}, Subject: ${subject}`);
-    return { success: true };
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to,
+      subject,
+      html,
+    });
+
+    console.log(`[EMAIL] Sent successfully to: ${to}, messageId: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error(`[EMAIL] Failed to send:`, error);
+    console.error(`[EMAIL] Failed to send to ${to}:`, error);
     throw error;
   }
 }
