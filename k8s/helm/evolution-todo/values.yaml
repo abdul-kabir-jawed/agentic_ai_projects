@@ -1,0 +1,209 @@
+# Default values for Evolution of Todo Helm chart
+# This is a YAML-formatted file.
+
+# ============================================
+# Global Settings
+# ============================================
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+
+# ============================================
+# Frontend Configuration
+# ============================================
+frontend:
+  enabled: true
+  replicaCount: 2
+
+  image:
+    repository: evolution-todo-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    hosts:
+      - host: todo.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  env:
+    NODE_ENV: production
+    NEXT_PUBLIC_API_URL: http://evolution-todo-backend:8000/api/v1
+
+# ============================================
+# Backend Configuration
+# ============================================
+backend:
+  enabled: true
+  replicaCount: 2
+
+  image:
+    repository: evolution-todo-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    hosts:
+      - host: api.todo.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  env:
+    PYTHONUNBUFFERED: "1"
+    HOST: "0.0.0.0"
+    PORT: "8000"
+    API_PREFIX: "/api/v1"
+
+# ============================================
+# Database Configuration
+# ============================================
+database:
+  # Use external Neon PostgreSQL by default
+  useExternal: true
+  # External database URL (set via secrets)
+  externalUrl: ""
+
+  # Local PostgreSQL (if useExternal is false)
+  local:
+    enabled: false
+    image:
+      repository: postgres
+      tag: "15-alpine"
+    storage:
+      size: 10Gi
+      storageClass: standard
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+# ============================================
+# Redis Configuration (Optional)
+# ============================================
+redis:
+  enabled: false
+  image:
+    repository: redis
+    tag: "7-alpine"
+  service:
+    port: 6379
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# ============================================
+# Kafka Configuration (Phase V)
+# ============================================
+kafka:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: confluentinc/cp-kafka
+    tag: "7.5.0"
+  zookeeper:
+    image:
+      repository: confluentinc/cp-zookeeper
+      tag: "7.5.0"
+
+# ============================================
+# Secrets Configuration
+# ============================================
+secrets:
+  # Create secrets from values (not recommended for production)
+  create: true
+  # Name of existing secret to use
+  existingSecret: ""
+  # Values (only used if create is true)
+  betterAuthSecret: ""
+  secretKey: ""
+  databaseUrl: ""
+  brevoApiKey: ""
+  openaiApiKey: ""
+
+# ============================================
+# Service Account
+# ============================================
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# ============================================
+# Pod Security
+# ============================================
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+# ============================================
+# Node Selection
+# ============================================
+nodeSelector: {}
+tolerations: []
+affinity: {}

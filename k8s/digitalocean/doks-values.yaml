@@ -1,0 +1,141 @@
+# DigitalOcean Kubernetes (DOKS) specific values
+# Override default values.yaml for DOKS deployment
+
+global:
+  # Use DigitalOcean Container Registry (DOCR)
+  imageRegistry: "registry.digitalocean.com/evolution-todo/"
+  imagePullSecrets:
+    - name: docr-secret
+
+# Frontend configuration for DOKS
+frontend:
+  enabled: true
+  replicaCount: 2
+
+  image:
+    repository: frontend
+    tag: latest
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 3000
+
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    hosts:
+      - host: todo.yourdomain.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: frontend-tls
+        hosts:
+          - todo.yourdomain.com
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  env:
+    NEXT_PUBLIC_API_URL: "https://api.yourdomain.com"
+
+# Backend configuration for DOKS
+backend:
+  enabled: true
+  replicaCount: 2
+
+  image:
+    repository: backend
+    tag: latest
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+      nginx.ingress.kubernetes.io/cors-allow-origin: "https://todo.yourdomain.com"
+      nginx.ingress.kubernetes.io/enable-cors: "true"
+    hosts:
+      - host: api.yourdomain.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: backend-tls
+        hosts:
+          - api.yourdomain.com
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  env:
+    CORS_ORIGINS: "https://todo.yourdomain.com"
+
+# Secrets configuration - use existing secrets from DOKS
+secrets:
+  create: false
+  existingSecret: evolution-todo-secrets
+
+# Service Account
+serviceAccount:
+  create: true
+  name: evolution-todo-sa
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Node selector for DOKS node pools
+nodeSelector:
+  doks.digitalocean.com/node-pool: default-pool
+
+# Tolerations for DOKS
+tolerations: []
+
+# Affinity rules for high availability
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - evolution-todo
+          topologyKey: kubernetes.io/hostname

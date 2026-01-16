@@ -1,0 +1,17 @@
+apiVersion: v2
+name: evolution-todo
+description: A Helm chart for Evolution of Todo - AI-Native Todo System
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - todo
+  - task-management
+  - ai
+  - fastapi
+  - nextjs
+maintainers:
+  - name: Evolution of Todo Team
+    email: team@evolutionoftodo.com
+sources:
+  - https://github.com/evolution-of-todo/evolution-of-todo
