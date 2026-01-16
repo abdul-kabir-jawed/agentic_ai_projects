@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 import { eq, and, ilike, desc, asc } from "drizzle-orm";
 import { z } from "zod";
-import * as schema from "@/db/schema";
+import { getDb, schema } from "@/db/client";
 import { requireAuth } from "@/lib/auth-middleware";
-
-const client = postgres(process.env.DATABASE_URL!);
-const db = drizzle(client, { schema });
 
 // Validation schema for creating a task
 const createTaskSchema = z.object({
@@ -80,7 +75,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get total count
-    const countResult = await db
+    const countResult = await getDb()
       .select({ count: schema.task.id })
       .from(schema.task)
       .where(and(...whereConditions));
@@ -88,7 +83,7 @@ export async function GET(request: NextRequest) {
 
     // Get paginated results
     const offset = (params.page - 1) * params.limit;
-    const tasks = await db
+    const tasks = await getDb()
       .select()
       .from(schema.task)
       .where(and(...whereConditions))
@@ -132,7 +127,7 @@ export async function POST(request: NextRequest) {
     const validatedData = createTaskSchema.parse(body);
 
     // Create task
-    const [newTask] = await db
+    const [newTask] = await getDb()
       .insert(schema.task)
       .values({
         userId,

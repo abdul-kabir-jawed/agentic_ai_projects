@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import * as schema from "@/db/schema";
+import { getDb, schema } from "@/db/client";
 import { requireAuth } from "@/lib/auth-middleware";
-
-const client = postgres(process.env.DATABASE_URL!);
-const db = drizzle(client, { schema });
 
 // Validation schema for updating profile
 const updateProfileSchema = z.object({
@@ -30,7 +25,7 @@ export async function GET(request: NextRequest) {
     const userId = sessionData.user.id;
 
     // Fetch user profile from Better Auth user table
-    const [userProfile] = await db
+    const [userProfile] = await getDb()
       .select()
       .from(schema.user)
       .where(eq(schema.user.id, userId));
@@ -89,7 +84,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update user profile
-    const [updatedUser] = await db
+    const [updatedUser] = await getDb()
       .update(schema.user)
       .set(updateData)
       .where(eq(schema.user.id, userId))

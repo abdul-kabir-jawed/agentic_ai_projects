@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
-import * as schema from "@/db/schema";
+import { getDb, schema } from "@/db/client";
 import { requireAuth } from "@/lib/auth-middleware";
-
-const client = postgres(process.env.DATABASE_URL!);
-const db = drizzle(client, { schema });
 
 // Validation schema for updating a task
 const updateTaskSchema = z.object({
@@ -41,7 +36,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid task ID" }, { status: 400 });
     }
 
-    const [task] = await db
+    const [task] = await getDb()
       .select()
       .from(schema.task)
       .where(and(eq(schema.task.id, taskId), eq(schema.task.userId, userId)));
@@ -83,7 +78,7 @@ export async function PUT(
     const validatedData = updateTaskSchema.parse(body);
 
     // Verify task belongs to user
-    const [existingTask] = await db
+    const [existingTask] = await getDb()
       .select()
       .from(schema.task)
       .where(and(eq(schema.task.id, taskId), eq(schema.task.userId, userId)));
@@ -93,7 +88,7 @@ export async function PUT(
     }
 
     // Update task
-    const [updatedTask] = await db
+    const [updatedTask] = await getDb()
       .update(schema.task)
       .set({
         ...(validatedData.description && { description: validatedData.description }),
@@ -142,7 +137,7 @@ export async function DELETE(
     }
 
     // Verify task belongs to user before deleting
-    const [existingTask] = await db
+    const [existingTask] = await getDb()
       .select()
       .from(schema.task)
       .where(and(eq(schema.task.id, taskId), eq(schema.task.userId, userId)));
@@ -152,7 +147,7 @@ export async function DELETE(
     }
 
     // Delete task
-    await db.delete(schema.task).where(eq(schema.task.id, taskId));
+    await getDb().delete(schema.task).where(eq(schema.task.id, taskId));
 
     return NextResponse.json({ success: true });
   } catch (error) {

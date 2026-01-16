@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 import { eq, and } from "drizzle-orm";
-import * as schema from "@/db/schema";
+import { getDb, schema } from "@/db/client";
 import { requireAuth } from "@/lib/auth-middleware";
-
-const client = postgres(process.env.DATABASE_URL!);
-const db = drizzle(client, { schema });
 
 /**
  * GET /api/tasks/daily
@@ -23,7 +18,7 @@ export async function GET(request: NextRequest) {
     const userId = sessionData.user.id;
 
     // Fetch all daily tasks for this user
-    const dailyTasks = await db
+    const dailyTasks = await getDb()
       .select()
       .from(schema.task)
       .where(and(eq(schema.task.userId, userId), eq(schema.task.isDaily, true)));

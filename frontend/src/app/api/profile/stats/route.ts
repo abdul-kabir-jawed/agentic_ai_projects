@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import { eq, and, count, sql } from "drizzle-orm";
-import * as schema from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { getDb, schema } from "@/db/client";
 import { requireAuth } from "@/lib/auth-middleware";
-
-const client = postgres(process.env.DATABASE_URL!);
-const db = drizzle(client, { schema });
 
 /**
  * GET /api/profile/stats
@@ -29,7 +24,7 @@ export async function GET(request: NextRequest) {
     const userId = sessionData.user.id;
 
     // Get all tasks for this user
-    const allTasks = await db
+    const allTasks = await getDb()
       .select()
       .from(schema.task)
       .where(eq(schema.task.userId, userId));

@@ -28,11 +28,16 @@ if (typeof window === "undefined") {
   }
 }
 
-// Get database connection
+// Check if we're in build mode (no DATABASE_URL available)
+const isBuildTime = !process.env.DATABASE_URL;
+
+// Get database connection - returns null during build time
 const getDatabase = () => {
   const DATABASE_URL = process.env.DATABASE_URL;
   if (!DATABASE_URL) {
-    throw new Error("DATABASE_URL environment variable is not set");
+    // Return a mock during build time to prevent errors
+    console.warn("DATABASE_URL not set - using placeholder during build");
+    return null as any;
   }
 
   const sql = neon(DATABASE_URL);
@@ -41,7 +46,7 @@ const getDatabase = () => {
 
 // Create Better Auth instance
 export const auth = betterAuth({
-  database: drizzleAdapter(getDatabase(), {
+  database: isBuildTime ? (null as any) : drizzleAdapter(getDatabase(), {
     provider: "pg",
     schema: {
       user: schema.user,

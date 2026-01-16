@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 import { eq, and } from "drizzle-orm";
-import * as schema from "@/db/schema";
+import { getDb, schema } from "@/db/client";
 import { requireAuth } from "@/lib/auth-middleware";
-
-const client = postgres(process.env.DATABASE_URL!);
-const db = drizzle(client, { schema });
 
 /**
  * PATCH /api/tasks/:id/complete
@@ -31,7 +26,7 @@ export async function PATCH(
     }
 
     // Get current task to toggle completion
-    const [task] = await db
+    const [task] = await getDb()
       .select()
       .from(schema.task)
       .where(and(eq(schema.task.id, taskId), eq(schema.task.userId, userId)));
@@ -41,7 +36,7 @@ export async function PATCH(
     }
 
     // Toggle completion status
-    const [updatedTask] = await db
+    const [updatedTask] = await getDb()
       .update(schema.task)
       .set({
         isCompleted: !task.isCompleted,
