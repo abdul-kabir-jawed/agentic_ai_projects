@@ -1,0 +1,37 @@
+# Evolution of Todo - Backend Dependencies
+# Generated from pyproject.toml for DigitalOcean App Platform
+
+# Core Framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+
+# Database
+sqlmodel>=0.0.14
+sqlalchemy>=2.0.23
+alembic>=1.12.1
+psycopg2-binary>=2.9.9
+asyncpg>=0.29.0
+
+# Authentication & Security
+pyjwt>=2.8.1
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.6
+
+# API & HTTP
+httpx>=0.27.0
+slowapi>=0.1.9
+
+# AI & Agents
+openai-agents>=0.0.15
+openai>=1.58.1
+
+# Event Streaming (optional)
+aiokafka>=0.10.0
+
+# Development (optional, for testing)
+# pytest>=7.4.3
+# pytest-asyncio>=0.21.1
+# pytest-cov>=4.1.0

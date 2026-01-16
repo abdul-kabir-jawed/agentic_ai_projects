@@ -28,47 +28,81 @@ App Platform is a PaaS that automatically builds and deploys your app.
 ### Step 1: Push Code to GitHub
 
 ```bash
-# Initialize git if not already done
-git init
-git add .
-git commit -m "Initial commit for deployment"
-
-# Create GitHub repo and push
-gh repo create evolution-of-todo --public
-git push -u origin main
+# Code is already pushed to: https://github.com/abdul-kabir-jawed/agentic_ai_projects
+# Repository: agentic_ai_projects
+# Branch: main
 ```
 
+**Important Files for Auto-Detection:**
+- `.do-app.yaml` - App Platform configuration (auto-detects services)
+- `frontend/package.json` - Detects Node.js frontend
+- `backend/requirements.txt` - Detects Python backend (alternative to Dockerfile)
+- `backend/Dockerfile` - Docker configuration for backend
+
+If DigitalOcean shows "No components detected", ensure these files exist in the repository.
+
 ### Step 2: Create App on DigitalOcean
+
+**Option A: Using `.do-app.yaml` (Recommended - Automatic Detection)**
+
+The repository includes a `.do-app.yaml` file that automatically configures your app. This ensures DigitalOcean detects all components correctly.
 
 1. Go to [DigitalOcean App Platform](https://cloud.digitalocean.com/apps)
 2. Click **"Create App"**
 3. Select **GitHub** as source
 4. Authorize DigitalOcean to access your repository
-5. Select the `evolution-of-todo` repository
+5. Select the `agentic_ai_projects` repository
+6. Select the `main` branch
+7. DigitalOcean will automatically detect the `.do-app.yaml` file and configure both services
+8. Review the detected configuration and proceed
+
+**Option B: Manual Configuration**
+
+If you prefer manual setup or the auto-detection doesn't work:
+
+1. Go to [DigitalOcean App Platform](https://cloud.digitalocean.com/apps)
+2. Click **"Create App"**
+3. Select **GitHub** as source
+4. Authorize DigitalOcean to access your repository
+5. Select the `agentic_ai_projects` repository
 6. Select the `main` branch
 
 ### Step 3: Configure Services
 
-DigitalOcean will auto-detect your app structure. Configure as follows:
+**If using manual configuration**, set up services as follows:
 
 #### Frontend Service:
 - **Name:** `frontend`
 - **Source Directory:** `/frontend`
-- **Build Command:** `npm run build`
+- **Build Command:** `npm ci && npm run build`
 - **Run Command:** `npm start`
 - **HTTP Port:** `3000`
 - **Instance Size:** Basic ($5/mo) or Professional ($12/mo)
+- **Environment:** Node.js
 
 #### Backend Service:
 - **Name:** `backend`
 - **Source Directory:** `/backend`
-- **Dockerfile Path:** `Dockerfile`
+- **Type:** Docker
+- **Dockerfile Path:** `Dockerfile` (in `/backend` directory)
 - **HTTP Port:** `8000`
 - **Instance Size:** Basic ($5/mo) or Professional ($12/mo)
 
+**Note:** The backend uses Docker because it requires Python 3.11+ and specific dependencies. The `requirements.txt` file is also available in `/backend` if you prefer a Python buildpack, but Docker is recommended.
+
 ### Step 4: Configure Environment Variables
 
-In the App Platform UI, add the following environment variables:
+**If using `.do-app.yaml`:** Most environment variables are pre-configured. You only need to add the **SECRET** values in the App Platform UI:
+1. Go to **Settings** > **App-Level Environment Variables**
+2. Add the following as **SECRET** type (click the lock icon):
+   - `DATABASE_URL` - Your Neon PostgreSQL connection string
+   - `BETTER_AUTH_SECRET` - 32+ character random string
+   - `SECRET_KEY` - JWT signing secret
+   - `BREVO_API_KEY` - Your Brevo API key
+   - `GEMINI_API_KEY` - (Optional) Fallback Gemini API key
+   - `OPENAI_API_KEY` - (Optional) Fallback OpenAI API key
+
+**If using manual configuration:** Add the following environment variables in the App Platform UI:
 
 #### Frontend Environment Variables:
 ```
