@@ -16,12 +16,10 @@ const nextConfig = {
     };
     return config;
   },
-  // Turbopack configuration (Next.js 16 default)
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        '@': path.resolve(__dirname, './src'),
-      },
+  // Turbopack resolver configuration
+  turbopack: {
+    resolveAlias: {
+      '@': './src',
     },
   },
   // Allow external image domains if needed

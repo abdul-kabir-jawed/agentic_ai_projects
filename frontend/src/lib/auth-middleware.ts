@@ -36,8 +36,8 @@ export async function requireAuth(request: NextRequest): Promise<{ user: AuthUse
       user: {
         id: session.user.id,
         email: session.user.email,
-        name: session.user.name,
-        image: session.user.image,
+        name: session.user.name ?? undefined,
+        image: session.user.image ?? undefined,
         createdAt: session.user.createdAt,
         updatedAt: session.user.updatedAt,
       },
