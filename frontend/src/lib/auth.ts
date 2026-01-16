@@ -22,7 +22,7 @@ if (typeof window === "undefined") {
   try {
     neonConfig.webSocketConstructor = ws;
     neonConfig.pipelineConnect = false;
-    neonConfig.fetchConnectionCache = true;
+    // Note: fetchConnectionCache is now always true by default (removed deprecated option)
   } catch (error) {
     console.warn("WebSocket configuration failed, using HTTP fetch:", error);
   }
