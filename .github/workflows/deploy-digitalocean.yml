@@ -55,7 +55,8 @@ jobs:
         working-directory: backend
         run: |
           pip install poetry
-          poetry install
+          poetry lock --no-update || poetry lock
+          poetry install --no-interaction
 
       - name: Run backend tests
         working-directory: backend
