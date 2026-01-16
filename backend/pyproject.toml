@@ -10,7 +10,7 @@ authors = ["AI Team <ai@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.104.1"
+fastapi = "^0.115.0"
 sqlmodel = "^0.0.14"
 pydantic = "^2.5.0"
 alembic = "^1.12.1"
