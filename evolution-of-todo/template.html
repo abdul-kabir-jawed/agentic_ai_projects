@@ -1,0 +1,688 @@
+<html lang="en" class="scroll-smooth"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolution of Todo - Premium Task Management</title>
+    <meta name="description" content="The intelligent todo app that adapts to your workflow. Obsidian &amp; Gold theme.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconify -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#08080a',
+                        deep: '#0c0c0f',
+                        surface: '#111115',
+                        elevated: '#18181d',
+                        card: '#1c1c22',
+                        gold: {
+                            DEFAULT: '#c9a962', // Champagne Gold
+                            bright: '#e4c77b', // Gold Bright
+                            dim: '#9a7d3a',    // Gold Dim
+                        },
+                        rose: {
+                            DEFAULT: '#b76e79', // Dusty Rose
+                            bright: '#d4919b',  // Rose Bright
+                        },
+                        text: {
+                            primary: '#f5f5f7',
+                            secondary: '#a1a1aa',
+                            tertiary: '#71717a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'serif'],
+                    },
+                    animation: {
+                        'float': 'float 8s ease-in-out infinite',
+                        'float-delayed': 'float 8s ease-in-out 4s infinite',
+                        'scroll': 'scroll 40s linear infinite',
+                        'fade-in-up': 'fadeInUp 1s ease-out forwards',
+                        'pulse-slow': 'pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        },
+                        scroll: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Utilities */
+        body {
+            background-color: #08080a;
+            color: #a1a1aa;
+            overflow-x: hidden;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .glass-nav {
+            background: rgba(12, 12, 15, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .glass-card {
+            background: #1c1c22;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.4s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(201, 169, 98, 0.3);
+            background: linear-gradient(145deg, rgba(28, 28, 34, 0.8) 0%, rgba(17, 17, 21, 0.9) 100%);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7), 0 0 20px rgba(201, 169, 98, 0.1);
+        }
+
+        .text-gradient-gold {
+            background: linear-gradient(135deg, #c9a962 0%, #e4c77b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .bg-mesh {
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(201, 169, 98, 0.08), transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 110%, rgba(183, 110, 121, 0.06), transparent 50%);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #c9a962 0%, #d4b572 100%);
+            color: #08080a;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gold:hover {
+            box-shadow: 0 0 25px rgba(201, 169, 98, 0.4);
+            filter: brightness(1.1);
+        }
+
+        /* Hide scrollbar for marquee */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom Accordion Details */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] summary ~ * {
+            animation: sweep .4s ease-in-out;
+        }
+        @keyframes sweep {
+            0%    {opacity: 0; transform: translateY(-10px)}
+            100%  {opacity: 1; transform: translateY(0)}
+        }
+    </style>
+<link id="all-fonts-link-font-geist" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist">.font-geist { font-family: 'Geist', sans-serif !important; }</style><link id="all-fonts-link-font-roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-roboto">.font-roboto { font-family: 'Roboto', sans-serif !important; }</style><link id="all-fonts-link-font-montserrat" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-montserrat">.font-montserrat { font-family: 'Montserrat', sans-serif !important; }</style><link id="all-fonts-link-font-poppins" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-poppins">.font-poppins { font-family: 'Poppins', sans-serif !important; }</style><link id="all-fonts-link-font-playfair" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&amp;display=swap"><style id="all-fonts-style-font-playfair">.font-playfair { font-family: 'Playfair Display', serif !important; }</style><link id="all-fonts-link-font-instrument-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-instrument-serif">.font-instrument-serif { font-family: 'Instrument Serif', serif !important; }</style><link id="all-fonts-link-font-merriweather" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&amp;display=swap"><style id="all-fonts-style-font-merriweather">.font-merriweather { font-family: 'Merriweather', serif !important; }</style><link id="all-fonts-link-font-bricolage" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-bricolage">.font-bricolage { font-family: 'Bricolage Grotesque', sans-serif !important; }</style><link id="all-fonts-link-font-jakarta" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-jakarta">.font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }</style><link id="all-fonts-link-font-manrope" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-manrope">.font-manrope { font-family: 'Manrope', sans-serif !important; }</style><link id="all-fonts-link-font-space-grotesk" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-space-grotesk">.font-space-grotesk { font-family: 'Space Grotesk', sans-serif !important; }</style><link id="all-fonts-link-font-work-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-work-sans">.font-work-sans { font-family: 'Work Sans', sans-serif !important; }</style><link id="all-fonts-link-font-pt-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-pt-serif">.font-pt-serif { font-family: 'PT Serif', serif !important; }</style><link id="all-fonts-link-font-geist-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist-mono">.font-geist-mono { font-family: 'Geist Mono', monospace !important; }</style><link id="all-fonts-link-font-space-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-space-mono">.font-space-mono { font-family: 'Space Mono', monospace !important; }</style><link id="all-fonts-link-font-quicksand" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-quicksand">.font-quicksand { font-family: 'Quicksand', sans-serif !important; }</style><link id="all-fonts-link-font-nunito" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-nunito">.font-nunito { font-family: 'Nunito', sans-serif !important; }</style><link id="all-fonts-link-font-newsreader" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&amp;display=swap"><style id="all-fonts-style-font-newsreader">.font-newsreader { font-family: 'Newsreader', serif !important; }</style><link id="all-fonts-link-font-google-sans-flex" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-google-sans-flex">.font-google-sans-flex { font-family: 'Google Sans Flex', sans-serif !important; }</style><link id="all-fonts-link-font-oswald" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-oswald">.font-oswald { font-family: 'Oswald', sans-serif !important; }</style><link id="all-fonts-link-font-dm-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-dm-sans">.font-dm-sans { font-family: 'DM Sans', sans-serif !important; }</style></head>
+<body class="antialiased selection:bg-gold/20 selection:text-gold-bright">
+
+    <!-- Background Gradients & Particles -->
+    <div class="fixed inset-0 z-[-1] bg-mesh pointer-events-none"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-nav transition-all duration-300">
+        <div class="flex h-20 max-w-7xl mr-auto ml-auto pr-6 pl-6 items-center justify-between">
+            <!-- Logo: Letters Only, Tight Tracking -->
+            <a href="#" class="flex items-center gap-2 group cursor-pointer text-text-primary hover:text-gold transition-colors">
+                <span class="font-serif font-bold text-2xl tracking-tighter">ET</span>
+            </a>
+
+            <div class="hidden md:flex items-center gap-8 text-sm font-normal text-text-secondary tracking-wide">
+                <a href="#features" class="transition-colors hover:text-gold-bright">Features</a>
+                <a href="#how-it-works" class="transition-colors hover:text-gold-bright">Methodology</a>
+                <a href="#testimonials" class="transition-colors hover:text-gold-bright">Stories</a>
+                <a href="#pricing" class="transition-colors hover:text-gold-bright">Membership</a>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <a href="#" class="hidden md:block text-sm font-medium transition-colors text-text-tertiary hover:text-text-primary">Sign In</a>
+                <a href="#" class="px-6 py-2.5 rounded-sm btn-gold text-xs md:text-sm font-semibold tracking-wide uppercase">
+                    Get Access
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen pt-32 pb-16 flex flex-col justify-center overflow-hidden">
+        <div class="grid lg:grid-cols-2 w-full max-w-7xl mr-auto ml-auto pr-6 pl-6 gap-x-16 gap-y-12 items-center">
+            
+            <!-- Left: Copy -->
+            <div class="space-y-10 z-10 animate-fade-in">
+                
+                
+                <h1 class="text-6xl md:text-8xl font-medium tracking-tight leading-[1] text-text-primary">
+                    Order from <br>
+                    <span class="text-gradient-gold italic pr-2">Chaos.</span>
+                </h1>
+                
+                <p class="text-xl max-w-lg leading-relaxed text-text-secondary font-light">
+                    An elegant workspace for the focused mind. Orchestrate your life with a tool designed for clarity, depth, and purpose.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-5 pt-4">
+                    <a href="#" class="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-sm btn-gold font-semibold text-deep">
+                        Begin Journey
+                        <iconify-icon icon="lucide:arrow-right" stroke-width="1.5"></iconify-icon>
+                    </a>
+                    
+                </div>
+
+                <div class="flex items-center gap-8 pt-6 text-xs font-medium text-text-tertiary tracking-wide uppercase">
+                    <div class="flex items-center gap-2">
+                        <iconify-icon icon="lucide:shield-check" class="text-gold"></iconify-icon> Secure
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <iconify-icon icon="lucide:infinity" class="text-rose"></iconify-icon> Unlimited
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Visual -->
+            <div class="relative z-10 hidden lg:block perspective-1000">
+                <!-- Decorative Glows -->
+                <div class="absolute -top-32 -right-32 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[120px] animate-pulse-slow"></div>
+                <div class="absolute -bottom-32 -left-20 w-[400px] h-[400px] bg-rose/5 rounded-full blur-[100px]"></div>
+                
+                <!-- Mockup Container -->
+                <div class="relative w-full aspect-[4/3] glass-card rounded-md border p-1 animate-float transform rotate-y-6 hover:rotate-0 transition-transform duration-1000 border-white/5 bg-deep">
+                    <!-- App Window -->
+                    <div class="w-full h-full bg-void rounded-sm overflow-hidden flex flex-col">
+                        <!-- Window Header -->
+                        <div class="h-12 bg-deep border-b flex items-center px-5 gap-3 border-white/5">
+                            <div class="flex gap-2 opacity-50">
+                                <div class="w-2.5 h-2.5 rounded-full bg-rose"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-gold"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-gold-dim"></div>
+                            </div>
+                            <div class="ml-auto text-[10px] font-mono text-text-tertiary tracking-widest opacity-50">EVOLUTION_OS</div>
+                        </div>
+                        
+                        <!-- Window Content -->
+                        <div class="flex-1 p-8 flex gap-8">
+                            <!-- Sidebar -->
+                            <div class="w-1/4 flex flex-col gap-6 border-r pr-6 border-white/5">
+                                <div class="h-6 w-20 rounded bg-white/5"></div>
+                                <div class="space-y-3 mt-4">
+                                    <div class="flex items-center gap-3 text-gold-bright">
+                                        <div class="w-1 h-4 bg-gold rounded-full"></div>
+                                        <div class="h-2 w-16 rounded bg-white/10"></div>
+                                    </div>
+                                    <div class="h-2 w-12 rounded bg-white/5 ml-4"></div>
+                                    <div class="h-2 w-14 rounded bg-white/5 ml-4"></div>
+                                </div>
+                            </div>
+                            <!-- Main Area -->
+                            <div class="flex-1 flex flex-col gap-6">
+                                <div class="flex justify-between items-end border-b border-white/5 pb-4">
+                                    <div class="h-8 w-32 bg-gradient-to-r from-white/10 to-transparent rounded"></div>
+                                    <div class="h-6 w-6 rounded-full border border-gold/30"></div>
+                                </div>
+                                <!-- Task Items -->
+                                <div class="space-y-4 mt-2">
+                                    <div class="p-4 rounded bg-surface border flex items-center gap-4 border-white/5 hover:border-gold/30 transition-colors group">
+                                        <div class="w-4 h-4 rounded-full border border-gold/50 group-hover:bg-gold/20 transition-colors"></div>
+                                        <div class="h-2 w-1/2 rounded bg-white/10"></div>
+                                        <div class="ml-auto text-[10px] tracking-widest uppercase text-gold-dim font-medium">Urgent</div>
+                                    </div>
+                                    <div class="p-4 rounded bg-surface border flex items-center gap-4 border-white/5 opacity-40">
+                                        <div class="w-4 h-4 rounded-full border border-text-tertiary bg-text-tertiary/20 flex items-center justify-center">
+                                            <iconify-icon icon="lucide:check" width="10" class="text-text-tertiary"></iconify-icon>
+                                        </div>
+                                        <div class="h-2 w-1/3 rounded line-through bg-white/10"></div>
+                                    </div>
+                                    <div class="p-4 rounded bg-surface border flex items-center gap-4 border-white/5">
+                                        <div class="w-4 h-4 rounded-full border border-rose/50"></div>
+                                        <div class="h-2 w-2/3 rounded bg-white/10"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating Element -->
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof / Infinite Scroll -->
+    
+
+    <!-- Features Section -->
+    <section id="features" class="py-32 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20 space-y-4">
+                <span class="text-gold font-medium tracking-widest text-xs uppercase border-b border-gold/30 pb-1">Capabilities</span>
+                <h2 class="text-4xl md:text-5xl font-medium tracking-tight text-text-primary">Engineered for <span class="italic text-text-tertiary">Flow</span></h2>
+                <p class="text-lg max-w-2xl mx-auto text-text-secondary font-light">Tools that retreat when you're focused and appear when you need them.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="glass-card p-10 rounded-sm group">
+                    <div class="w-12 h-12 rounded-sm bg-gold/5 border border-gold/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                        <iconify-icon icon="lucide:layers" width="24" class="text-gold"></iconify-icon>
+                    </div>
+                    <h3 class="text-2xl font-serif font-medium mb-4 text-text-primary">Contextual Stacking</h3>
+                    <p class="text-sm leading-relaxed text-text-secondary font-light">Intelligently groups related tasks. The interface adapts to show only what is relevant now.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-card p-10 rounded-sm group">
+                    <div class="w-12 h-12 rounded-sm bg-rose/5 border border-rose/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                        <iconify-icon icon="lucide:flame" width="24" class="text-rose"></iconify-icon>
+                    </div>
+                    <h3 class="text-2xl font-serif font-medium mb-4 text-text-primary">Momentum Tracking</h3>
+                    <p class="text-sm leading-relaxed text-text-secondary font-light">Visualise your consistency. Golden streaks encourage daily discipline without pressure.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-card p-10 rounded-sm group">
+                    <div class="w-12 h-12 rounded-sm bg-gold/5 border border-gold/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                        <iconify-icon icon="lucide:layout-grid" width="24" class="text-gold"></iconify-icon>
+                    </div>
+                    <h3 class="text-2xl font-serif font-medium mb-4 text-text-primary">Macro Views</h3>
+                    <p class="text-sm leading-relaxed text-text-secondary font-light">Step back from the details. See the landscape of your projects in a unified dashboard.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="glass-card p-10 rounded-sm group">
+                    <div class="w-12 h-12 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                        <iconify-icon icon="lucide:clock" width="24" class="text-text-primary"></iconify-icon>
+                    </div>
+                    <h3 class="text-2xl font-serif font-medium mb-4 text-text-primary">Temporal Awareness</h3>
+                    <p class="text-sm leading-relaxed text-text-secondary font-light">A timeline that understands urgency. Smart nudges keep you aligned with your goals.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="glass-card p-10 rounded-sm group">
+                    <div class="w-12 h-12 rounded-sm bg-gold/5 border border-gold/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                        <iconify-icon icon="lucide:zap" width="24" class="text-gold"></iconify-icon>
+                    </div>
+                    <h3 class="text-2xl font-serif font-medium mb-4 text-text-primary">Deep Focus Mode</h3>
+                    <p class="text-sm leading-relaxed text-text-secondary font-light">Banish distractions. The interface dims, highlighting only the singular task at hand.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="glass-card p-10 rounded-sm group">
+                    <div class="w-12 h-12 rounded-sm bg-rose/5 border border-rose/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                        <iconify-icon icon="lucide:arrow-left-right" width="24" class="text-rose"></iconify-icon>
+                    </div>
+                    <h3 class="text-2xl font-serif font-medium mb-4 text-text-primary">Seamless Sync</h3>
+                    <p class="text-sm leading-relaxed text-text-secondary font-light">Fluid continuity across devices. Your state is preserved perfectly in the cloud.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- App Showcase Section -->
+    <section class="py-32 relative overflow-hidden bg-gradient-to-b from-void via-deep to-void">
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-medium tracking-tight mb-4 text-text-primary">A Sanctuary for Tasks</h2>
+                <div class="flex justify-center gap-1 mt-8 p-1 bg-surface inline-flex rounded border border-white/5">
+                    <button class="px-6 py-2 rounded-sm text-sm font-medium bg-elevated text-text-primary shadow-sm border border-white/5">Dashboard</button>
+                    <button class="px-6 py-2 rounded-sm text-sm font-medium transition-colors hover:text-gold text-text-tertiary">Timeline</button>
+                    <button class="px-6 py-2 rounded-sm text-sm font-medium transition-colors hover:text-gold text-text-tertiary">Archives</button>
+                </div>
+            </div>
+
+            <!-- Browser Mockup -->
+            <div class="relative w-full aspect-[16/9] bg-deep rounded-md border shadow-[0_0_100px_-20px_rgba(201,169,98,0.1)] overflow-hidden group border-white/5">
+                <!-- Browser Chrome -->
+                <div class="h-12 bg-surface border-b flex items-center px-6 gap-4 border-white/5">
+                    <div class="flex gap-2 opacity-30">
+                        <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                    </div>
+                    <div class="flex-1 max-w-xl mx-auto bg-deep h-8 rounded-sm flex items-center px-4 text-xs text-text-tertiary border border-white/5 font-mono">
+                        <iconify-icon icon="lucide:lock" class="mr-2 text-gold-dim"></iconify-icon>
+                        evolution.app/focus
+                    </div>
+                </div>
+                
+                <!-- Interface Placeholder -->
+                <div class="w-full h-full relative flex bg-deep">
+                    <!-- Nav -->
+                    <div class="w-64 h-full border-r bg-surface/50 p-6 hidden md:block border-white/5 backdrop-blur-sm">
+                        <div class="space-y-8">
+                            <div class="space-y-1">
+                                <div class="h-10 w-full rounded-sm flex items-center px-4 text-sm gap-3 bg-white/5 text-text-primary border border-white/5 font-medium">
+                                    <iconify-icon icon="lucide:home" class="text-gold"></iconify-icon> Overview
+                                </div>
+                                <div class="h-10 w-full rounded-sm flex items-center px-4 text-sm text-text-tertiary gap-3 hover:text-text-secondary transition-colors">
+                                    <iconify-icon icon="lucide:calendar"></iconify-icon> Schedule
+                                </div>
+                            </div>
+                            <div class="pt-6 border-t border-white/5">
+                                <div class="text-[10px] tracking-[0.2em] font-bold mb-4 text-text-tertiary uppercase">Projects</div>
+                                <div class="space-y-3">
+                                    <div class="flex items-center gap-3 text-sm text-text-secondary hover:text-gold transition-colors cursor-pointer">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-gold"></div> Q4 Roadmap
+                                    </div>
+                                    <div class="flex items-center gap-3 text-sm text-text-secondary hover:text-rose transition-colors cursor-pointer">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-rose"></div> Brand Identity
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Content -->
+                    <div class="flex-1 p-10 overflow-hidden">
+                        <div class="flex justify-between items-end mb-10">
+                            <div>
+                                <h3 class="text-3xl font-serif font-medium mb-1 text-text-primary">Evening, Alex.</h3>
+                                <p class="text-text-tertiary text-sm font-light">Reflect on today's achievements.</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center font-serif font-bold text-gold">A</div>
+                        </div>
+
+                        <!-- Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Card 1 -->
+                            <div class="p-6 rounded-sm border bg-card border-white/5 hover:border-gold/20 transition-colors">
+                                <div class="flex justify-between mb-6">
+                                    <span class="text-sm font-medium text-text-primary tracking-wide uppercase text-xs">Priority</span>
+                                    <iconify-icon icon="lucide:more-horizontal" class="text-text-tertiary"></iconify-icon>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-4 group/item">
+                                        <div class="w-5 h-5 rounded-sm border border-text-tertiary hover:border-gold hover:bg-gold/10 transition-all cursor-pointer"></div>
+                                        <span class="text-sm text-text-secondary font-light">Finalize investment deck</span>
+                                    </div>
+                                    <div class="flex items-center gap-4 group/item">
+                                        <div class="w-5 h-5 rounded-sm border border-text-tertiary hover:border-gold hover:bg-gold/10 transition-all cursor-pointer"></div>
+                                        <span class="text-sm text-text-secondary font-light">Quarterly board review</span>
+                                    </div>
+                                    <div class="flex items-center gap-4 group/item opacity-50">
+                                        <div class="w-5 h-5 rounded-sm border border-gold bg-gold/20 flex items-center justify-center">
+                                            <iconify-icon icon="lucide:check" width="12" class="text-gold"></iconify-icon>
+                                        </div>
+                                        <span class="text-sm text-text-secondary font-light line-through">Client onboarding</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Card 2 -->
+                            <div class="p-6 rounded-sm border bg-card border-white/5 hover:border-rose/20 transition-colors">
+                                <div class="flex justify-between mb-6">
+                                    <span class="text-sm font-medium text-text-primary tracking-wide uppercase text-xs">Velocity</span>
+                                </div>
+                                <div class="flex items-end gap-2 h-28">
+                                    <div class="w-full rounded-t-sm h-[40%] bg-white/5"></div>
+                                    <div class="w-full rounded-t-sm h-[60%] bg-white/5"></div>
+                                    <div class="w-full bg-gradient-to-t from-gold-dim to-gold rounded-t-sm h-[80%] relative group/bar shadow-[0_0_20px_-5px_rgba(201,169,98,0.5)]">
+                                        
+                                    </div>
+                                    <div class="w-full rounded-t-sm h-[50%] bg-white/5"></div>
+                                    <div class="w-full rounded-t-sm h-[30%] bg-white/5"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Highlight Tooltip -->
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-32 bg-void">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-24">
+                <h2 class="text-4xl md:text-5xl font-medium tracking-tight mb-4 text-text-primary">Three Steps to Clarity</h2>
+                <p class="text-text-secondary font-light">Simplicity is the ultimate sophistication.</p>
+            </div>
+
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-16">
+                <!-- Connector Line (Desktop) -->
+                <div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent border-t border-dashed border-white/10"></div>
+
+                <!-- Step 1 -->
+                <div class="relative flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-surface to-void border border-white/5 flex items-center justify-center relative z-10 mb-8 group-hover:border-gold/30 transition-all duration-500 shadow-2xl">
+                        <span class="absolute -top-2 -right-2 text-5xl font-serif text-white/5 font-bold">1</span>
+                        <iconify-icon icon="lucide:user-plus" width="32" class="text-gold"></iconify-icon>
+                    </div>
+                    <h3 class="text-2xl font-serif font-medium mb-3 text-text-primary">Initiate</h3>
+                    <p class="text-sm max-w-xs text-text-secondary leading-relaxed font-light">Create your secure account. No friction, just immediate access to your new workspace.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-surface to-void border border-white/5 flex items-center justify-center relative z-10 mb-8 group-hover:border-rose/30 transition-all duration-500 shadow-2xl">
+                        <span class="absolute -top-2 -right-2 text-5xl font-serif text-white/5 font-bold">2</span>
+                        <iconify-icon icon="lucide:pen-line" width="32" class="text-rose"></iconify-icon>
+                    </div>
+                    <h3 class="text-2xl font-serif font-medium mb-3 text-text-primary">Capture</h3>
+                    <p class="text-sm max-w-xs text-text-secondary leading-relaxed font-light">Dump your mind. Input tasks, dreams, and deadlines. Let the system organize them.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-surface to-void border border-white/5 flex items-center justify-center relative z-10 mb-8 group-hover:border-gold/30 transition-all duration-500 shadow-2xl">
+                        <span class="absolute -top-2 -right-2 text-5xl font-serif text-white/5 font-bold">3</span>
+                        <iconify-icon icon="lucide:bar-chart-2" width="32" class="text-gold-bright"></iconify-icon>
+                    </div>
+                    <h3 class="text-2xl font-serif font-medium mb-3 text-text-primary">Evolve</h3>
+                    <p class="text-sm max-w-xs text-text-secondary leading-relaxed font-light">Review your analytics. Watch your productivity compound day after day.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="py-32 relative overflow-hidden bg-deep">
+        <div class="max-w-7xl mx-auto px-6 relative">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-medium tracking-tight mb-2 text-text-primary">Voices of the Community</h2>
+                <p class="text-text-tertiary font-light">High performers share their experience.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="glass-card p-8 rounded-sm relative">
+                    <iconify-icon icon="lucide:quote" class="absolute top-8 right-8 text-gold/10" width="48"></iconify-icon>
+                    <p class="leading-relaxed mb-8 text-text-secondary font-light text-lg">"Evolution of Todo isn't just an app; it's a philosophy. It forced me to prioritize what actually matters. The interface is stunning."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-sm flex items-center justify-center text-sm font-bold bg-surface border border-white/5 text-gold font-serif">SK</div>
+                        <div>
+                            <div class="font-medium text-text-primary font-serif">Sarah K.</div>
+                            <div class="text-text-tertiary text-xs tracking-wider uppercase">Director of Design</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-card p-8 rounded-sm relative border-gold/20 bg-surface/80">
+                    <iconify-icon icon="lucide:quote" class="absolute top-8 right-8 text-gold/10" width="48"></iconify-icon>
+                    <p class="leading-relaxed mb-8 text-text-primary font-normal text-lg">"I've tried them all. This is the first time I feel calm looking at my todo list. The dark theme is perfection for late nights."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-sm flex items-center justify-center text-sm font-bold bg-surface border border-white/5 text-gold font-serif">MR</div>
+                        <div>
+                            <div class="font-medium text-text-primary font-serif">Marcus R.</div>
+                            <div class="text-text-tertiary text-xs tracking-wider uppercase">Senior Engineer</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-card p-8 rounded-sm relative">
+                    <iconify-icon icon="lucide:quote" class="absolute top-8 right-8 text-gold/10" width="48"></iconify-icon>
+                    <p class="leading-relaxed mb-8 text-text-secondary font-light text-lg">"The project timeline view saved my last launch. Seeing everything laid out with such elegance made execution effortless."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-sm flex items-center justify-center text-sm font-bold bg-surface border border-white/5 text-gold font-serif">ET</div>
+                        <div>
+                            <div class="font-medium text-text-primary font-serif">Emily T.</div>
+                            <div class="text-text-tertiary text-xs tracking-wider uppercase">Founder</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-20 border-y border-white/5 bg-surface">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+            <div class="space-y-3">
+                <div class="text-4xl md:text-5xl font-serif text-text-primary">10k+</div>
+                <div class="text-gold text-xs font-medium tracking-[0.2em] uppercase">Members</div>
+            </div>
+            <div class="space-y-3">
+                <div class="text-4xl md:text-5xl font-serif text-text-primary">500k</div>
+                <div class="text-gold text-xs font-medium tracking-[0.2em] uppercase">Tasks Evolved</div>
+            </div>
+            <div class="space-y-3">
+                <div class="text-4xl md:text-5xl font-serif text-text-primary">99%</div>
+                <div class="text-gold text-xs font-medium tracking-[0.2em] uppercase">Efficiency</div>
+            </div>
+            <div class="space-y-3">
+                <div class="text-4xl md:text-5xl font-serif text-text-primary">4.9</div>
+                <div class="text-gold text-xs font-medium tracking-[0.2em] uppercase">Rating</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-32 max-w-3xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-serif font-medium tracking-tight mb-2 text-text-primary">Inquiries</h2>
+            <p class="text-text-tertiary font-light">Common questions regarding the platform.</p>
+        </div>
+
+        <div class="space-y-6">
+            <details class="group glass-card rounded-sm">
+                <summary class="flex items-center justify-between p-6 cursor-pointer font-medium transition-colors text-text-primary hover:text-gold">
+                    Is the Obsidian tier complimentary?
+                    <iconify-icon icon="lucide:chevron-down" class="group-open:rotate-180 transition-transform duration-300 text-gold"></iconify-icon>
+                </summary>
+                <div class="px-6 pb-6 text-sm font-light leading-relaxed border-t pt-4 text-text-secondary border-white/5">
+                    Yes. The core experience is free forever. We believe essential productivity tools should be accessible to everyone. Premium features are available for power users.
+                </div>
+            </details>
+
+            <details class="group glass-card rounded-sm">
+                <summary class="flex items-center justify-between p-6 cursor-pointer font-medium transition-colors text-text-primary hover:text-gold">
+                    Is my data encrypted?
+                    <iconify-icon icon="lucide:chevron-down" class="group-open:rotate-180 transition-transform duration-300 text-gold"></iconify-icon>
+                </summary>
+                <div class="px-6 pb-6 text-sm font-light leading-relaxed border-t pt-4 text-text-secondary border-white/5">
+                    We employ bank-grade AES-256 encryption for all data at rest and in transit. Your privacy is not a feature; it is the foundation of our architecture.
+                </div>
+            </details>
+
+            <details class="group glass-card rounded-sm">
+                <summary class="flex items-center justify-between p-6 cursor-pointer font-medium transition-colors text-text-primary hover:text-gold">
+                    Can I migrate from other platforms?
+                    <iconify-icon icon="lucide:chevron-down" class="group-open:rotate-180 transition-transform duration-300 text-gold"></iconify-icon>
+                </summary>
+                <div class="px-6 pb-6 text-sm font-light leading-relaxed border-t pt-4 text-text-secondary border-white/5">
+                     Seamlessly import from Todoist, Notion, and CSV formats. Our migration wizard ensures no data point is left behind during the transition.
+                </div>
+            </details>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    
+
+    <!-- Footer -->
+    <footer class="border-t bg-black pt-20 pb-10 border-white/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-20">
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="font-serif font-bold text-2xl tracking-tighter text-text-primary">ET</span>
+                    </div>
+                    <p class="text-text-tertiary text-sm mb-8 max-w-xs font-light leading-relaxed">
+                        Obsidian &amp; Gold Edition.<br>
+                        Crafted for the modern stoic.
+                    </p>
+                    <div class="flex gap-6 text-text-tertiary">
+                        <a href="#" class="transition-colors hover:text-gold"><iconify-icon icon="simple-icons:twitter"></iconify-icon></a>
+                        <a href="#" class="transition-colors hover:text-gold"><iconify-icon icon="simple-icons:github"></iconify-icon></a>
+                        <a href="#" class="transition-colors hover:text-gold"><iconify-icon icon="simple-icons:discord"></iconify-icon></a>
+                    </div>
+                </div>
+                
+                <div class="">
+                    <h4 class="font-medium mb-6 text-sm text-text-primary uppercase tracking-widest text-xs">Product</h4>
+                    <ul class="space-y-3 text-sm text-text-secondary font-light">
+                        <li><a href="#" class="transition-colors hover:text-gold">Features</a></li>
+                        <li><a href="#" class="transition-colors hover:text-gold">Pricing</a></li>
+                        <li><a href="#" class="transition-colors hover:text-gold">Manifesto</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-medium mb-6 text-sm text-text-primary uppercase tracking-widest text-xs">Support</h4>
+                    <ul class="space-y-3 text-sm text-text-secondary font-light">
+                        <li><a href="#" class="transition-colors hover:text-gold">Documentation</a></li>
+                        <li><a href="#" class="transition-colors hover:text-gold">API Reference</a></li>
+                        <li><a href="#" class="transition-colors hover:text-gold">Status</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-medium mb-6 text-sm text-text-primary uppercase tracking-widest text-xs">Legal</h4>
+                    <ul class="space-y-3 text-sm text-text-secondary font-light">
+                        <li><a href="#" class="transition-colors hover:text-gold">Privacy</a></li>
+                        <li><a href="#" class="transition-colors hover:text-gold">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs border-white/5 text-text-tertiary font-light">
+                <p>© 2024 Evolution of Todo.</p>
+                <p>Designed with precision.</p>
+            </div>
+        </div>
+    </footer>
+
+</body></html>

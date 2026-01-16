@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "executeautomation-playwright-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@executeautomation/playwright-mcp-server"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
+    },
+    "Neon": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.neon.tech/mcp"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+      }
+    }
+  }
+}
