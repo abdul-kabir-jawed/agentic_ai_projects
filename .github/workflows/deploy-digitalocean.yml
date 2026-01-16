@@ -189,7 +189,7 @@ jobs:
           echo "Tests passed successfully ✅"
 
   notify:
-    needs: [deploy, skip-deployment-notice]
+    needs: deploy
     runs-on: ubuntu-latest
     if: always() && secrets.DIGITALOCEAN_ACCESS_TOKEN != ''
 
