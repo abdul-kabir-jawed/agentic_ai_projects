@@ -19,9 +19,9 @@ export interface AuthUser {
 
 /**
  * Require authentication for API routes
- * Returns the authenticated user or throws an error
+ * Returns an object with user property to match expected structure
  */
-export async function requireAuth(request: NextRequest): Promise<AuthUser> {
+export async function requireAuth(request: NextRequest): Promise<{ user: AuthUser }> {
   try {
     // Get session from Better Auth
     const session = await auth.api.getSession({
@@ -33,12 +33,14 @@ export async function requireAuth(request: NextRequest): Promise<AuthUser> {
     }
 
     return {
-      id: session.user.id,
-      email: session.user.email,
-      name: session.user.name,
-      image: session.user.image,
-      createdAt: session.user.createdAt,
-      updatedAt: session.user.updatedAt,
+      user: {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name,
+        image: session.user.image,
+        createdAt: session.user.createdAt,
+        updatedAt: session.user.updatedAt,
+      },
     };
   } catch (error) {
     throw new Error("Unauthorized");
@@ -48,7 +50,7 @@ export async function requireAuth(request: NextRequest): Promise<AuthUser> {
 /**
  * Optional authentication - returns user if authenticated, null otherwise
  */
-export async function getOptionalAuth(request: NextRequest): Promise<AuthUser | null> {
+export async function getOptionalAuth(request: NextRequest): Promise<{ user: AuthUser } | null> {
   try {
     return await requireAuth(request);
   } catch {

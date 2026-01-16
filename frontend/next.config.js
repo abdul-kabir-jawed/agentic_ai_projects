@@ -16,14 +16,6 @@ const nextConfig = {
     };
     return config;
   },
-  // Turbopack configuration
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        '@': path.resolve(__dirname, './src'),
-      },
-    },
-  },
   // Allow external image domains if needed
   images: {
     remotePatterns: [
