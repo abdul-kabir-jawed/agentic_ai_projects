@@ -36,7 +36,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Set environment variables (PORT will be overridden by Railway)
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
+    PORT=8080 \
     HOSTNAME=0.0.0.0
 
 # Copy only necessary files for production
@@ -50,8 +50,8 @@ RUN chown -R nextjs:nodejs /app
 # Switch to non-root user
 USER nextjs
 
-# Expose port (Railway will use PORT env var)
-EXPOSE ${PORT}
+# Expose port 8080 (Railway standard)
+EXPOSE 8080
 
-# Run the application - server.js reads PORT from environment
-CMD ["node", "server.js"]
+# Run the application using shell form to ensure PORT env var is read
+CMD node server.js
