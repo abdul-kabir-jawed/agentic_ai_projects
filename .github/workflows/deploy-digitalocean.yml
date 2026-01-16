@@ -70,7 +70,7 @@ jobs:
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
-    if: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN != '' }}
+    if: always()
     outputs:
       frontend_image: ${{ steps.meta-frontend.outputs.tags }}
       backend_image: ${{ steps.meta-backend.outputs.tags }}
@@ -131,7 +131,6 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN != '' }}
     environment: production
 
     steps:
@@ -177,21 +176,10 @@ jobs:
           echo "=== Ingress ==="
           kubectl get ingress -l app.kubernetes.io/name=evolution-todo
 
-  skip-deployment-notice:
-    needs: test
-    runs-on: ubuntu-latest
-    if: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN == '' }}
-    steps:
-      - name: Notice
-        run: |
-          echo "⚠️ Deployment skipped: DIGITALOCEAN_ACCESS_TOKEN secret not configured"
-          echo "See .github/SETUP_SECRETS.md for setup instructions"
-          echo "Tests passed successfully ✅"
-
   notify:
     needs: deploy
     runs-on: ubuntu-latest
-    if: always() && secrets.DIGITALOCEAN_ACCESS_TOKEN != ''
+    if: always()
 
     steps:
       - name: Notify on success
