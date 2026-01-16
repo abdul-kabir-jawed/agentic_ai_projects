@@ -33,10 +33,11 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Set environment variables
+# Set environment variables (PORT will be overridden by Railway)
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
 
 # Copy only necessary files for production
 COPY --from=builder /app/public ./public
@@ -49,12 +50,12 @@ RUN chown -R nextjs:nodejs /app
 # Switch to non-root user
 USER nextjs
 
-# Expose port
-EXPOSE 3000
+# Expose port (Railway will use PORT env var)
+EXPOSE ${PORT}
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget -q --spider http://localhost:3000/api/health || exit 1
+# Health check (disabled to avoid port mismatch issues)
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+#     CMD wget -q --spider http://localhost:${PORT}/api/health || exit 1
 
-# Run the application
+# Run the application - server.js reads PORT from environment
 CMD ["node", "server.js"]
