@@ -3,7 +3,8 @@ const path = require('path');
 
 const nextConfig = {
   reactStrictMode: true,
-  // Removed standalone for Nixpacks deployment on Railway
+  // Enable standalone output for Docker deployment
+  output: "standalone",
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
   },

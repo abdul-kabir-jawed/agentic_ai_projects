@@ -1,1 +1,355 @@
-during the registration we have can ask the user for there gemini api key and openai api key its optional without that user cant access the ai chat page or chatbox they cant use it and the user can update the api or add the api in the profile page too we store that in the table with a column of api having a dictionary having gemini and openai api keys in a way that its protected encrypted for user safety so we dont have too add the api in env by ourself each user can give there own api key so the api of gemini and openai will not be given from the env but from the user
+DATABASE_URL
+*******
+
+
+
+NEON_DATABASE_URL
+*******
+
+
+
+USE_LOCAL_DB
+*******
+
+
+
+BETTER_AUTH_SECRET
+*******
+
+
+
+BETTER_AUTH_URL
+*******
+
+
+
+BETTER_AUTH_SESSION_EXPIRES_IN
+*******
+
+
+
+EMAIL_VERIFICATION_ENABLED
+*******
+
+
+
+SECRET_KEY
+*******
+
+
+
+ACCESS_TOKEN_EXPIRE_MINUTES
+*******
+
+
+
+HOST
+*******
+
+
+
+PORT
+*******
+
+
+
+API_PREFIX
+*******
+
+
+
+CORS_ORIGINS
+*******
+
+
+
+BREVO_API_KEY
+*******
+
+
+
+EMAIL_FROM_ADDRESS
+*******
+
+
+
+EMAIL_FROM_NAME
+*******
+
+
+
+EMAIL_ENABLED
+*******
+
+
+
+EMAIL_FROM
+*******
+
+
+
+SMTP_HOST
+*******
+
+
+
+SMTP_PORT
+*******
+
+
+
+SMTP_USER
+*******
+
+
+
+SMTP_PASSWORD
+*******
+
+
+
+KAFKA_ENABLED
+*******
+
+
+
+KAFKA_BOOTSTRAP_SERVERS
+*******
+
+
+
+DEBUG
+*******
+
+
+
+LOG_LEVEL
+*******
+
+//backend logs
+2026-01-16T20:25:14.000000000Z [inf]  Starting Container
+2026-01-16T20:25:17.957443633Z [inf]  [DATABASE] Using NEON PostgreSQL: ep-morning-sound-a1v9dwtd-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+2026-01-16T20:25:19.601917875Z [inf]  [MAIN] Chatbot router registered with 6 routes
+2026-01-16T20:25:19.601933279Z [inf]  [MAIN]   - ['GET'] /chat/api-key-check
+2026-01-16T20:25:19.601942473Z [inf]  [MAIN]   - ['POST'] /chat
+2026-01-16T20:25:19.601950989Z [inf]  [MAIN]   - ['GET'] /chat/history
+2026-01-16T20:25:19.601959639Z [inf]  [MAIN]   - ['DELETE'] /chat/history
+2026-01-16T20:25:19.601968042Z [inf]  [MAIN]   - ['POST'] /chat/task
+2026-01-16T20:25:19.601977845Z [inf]  [MAIN]   - ['GET'] /chat/health
+2026-01-16T20:25:19.601987325Z [err]  INFO:     Started server process [2]
+2026-01-16T20:25:19.602010365Z [err]  INFO:     Waiting for application startup.
+2026-01-16T20:25:22.823683220Z [inf]  Event streaming service initialized
+2026-01-16T20:25:22.823689953Z [err]  2026-01-16 20:25:22,821 - src.services.event_service - INFO - Kafka event streaming is disabled
+2026-01-16T20:25:22.823694523Z [err]  INFO:     Application startup complete.
+2026-01-16T20:25:22.823699432Z [err]  INFO:     Uvicorn running on http://0.0.0.0:8003 (Press CTRL+C to quit)
+2026-01-16T20:26:42.431164871Z [inf]  INFO:     100.64.0.2:26602 - "GET /health HTTP/1.1" 200 OK
+2026-01-16T21:04:37.938482032Z [inf]  INFO:     100.64.0.3:32744 - "GET / HTTP/1.1" 200 OK
+2026-01-16T21:04:37.938487702Z [inf]  INFO:     100.64.0.3:32744 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+2026-01-16T21:06:59.601173944Z [inf]  INFO:     100.64.0.4:29604 - "GET /health HTTP/1.1" 200 OK
+
+
+
+//frontend
+NEXT_PUBLIC_API_URL
+*******
+
+
+
+NEXT_PUBLIC_API_BASE_PATH
+*******
+
+
+
+BETTER_AUTH_URL
+*******
+
+
+
+BETTER_AUTH_SECRET
+*******
+
+
+
+DATABASE_URL
+*******
+
+
+
+DEBUG
+*******
+
+
+
+NEXT_PUBLIC_EXPERIMENTAL_FEATURES
+*******
+
+
+
+NEXT_PUBLIC_ENABLE_CHATBOT
+*******
+
+
+
+NEXT_PUBLIC_ENABLE_VOICE_INPUT
+*******
+
+
+
+BREVO_API_KEY
+*******
+
+
+
+EMAIL_FROM_ADDRESS
+*******
+
+
+
+EMAIL_FROM_NAME
+*******
+
+
+
+EMAIL_HOST
+*******
+
+
+
+EMAIL_PORT
+*******
+
+
+
+EMAIL_USER
+*******
+
+
+
+EMAIL_PASS
+*******
+
+
+
+EMAIL_FROM
+*******
+
+
+
+HOSTNAME
+*******
+
+
+
+PORT
+
+//frontend logs 2026-01-16T21:24:53.000000000Z [inf]  Starting Container
+2026-01-16T21:24:54.095579608Z [inf]  ▲ Next.js 16.1.1
+2026-01-16T21:24:54.095583788Z [inf]  - Local:         http://localhost:8080
+2026-01-16T21:24:54.095587556Z [inf]  - Network:       http://0.0.0.0:8080
+2026-01-16T21:24:54.095591352Z [inf]  
+2026-01-16T21:24:54.095601528Z [inf]  ✓ Starting...
+2026-01-16T21:24:54.095605273Z [inf]  ✓ Ready in 80ms
+2026-01-16T21:24:54.095608930Z [err]  The `fetchConnectionCache` option is deprecated (now always `true`)
+
+
+You reached the start of the range
+Jan 17, 2026, 2:19 AM
+ 
+[Region: us-west1]
+=========================
+Using Detected Dockerfile
+=========================
+
+context: 4j4s-FH6u
+
+internal
+load build definition from Dockerfile
+0ms
+
+internal
+load metadata for docker.io/library/node:20-alpine
+502ms
+
+auth
+library/node:pull token for registry-1.docker.io
+0ms
+
+internal
+load .dockerignore
+0ms
+
+internal
+load build context
+0ms
+
+deps
+FROM docker.io/library/node:20-alpine@sha256:3960ed74dfe320a67bf8da9555b6bade25ebda2b22b6081d2f60fd7d5d430e9c
+5ms
+
+production
+COPY --from=builder /app/public ./public cached
+0ms
+
+builder
+RUN npm run build cached
+0ms
+
+builder
+COPY . . cached
+0ms
+
+builder
+COPY --from=deps /app/node_modules ./node_modules cached
+0ms
+
+deps
+RUN npm ci --legacy-peer-deps cached
+0ms
+
+production
+COPY --from=builder /app/.next/static ./.next/static cached
+0ms
+
+deps
+WORKDIR /app cached
+0ms
+
+deps
+RUN apk add --no-cache libc6-compat cached
+0ms
+
+production
+RUN addgroup --system --gid 1001 nodejs &&     adduser --system --uid 1001 nextjs cached
+0ms
+
+builder
+WORKDIR /app cached
+0ms
+
+production
+COPY --from=builder /app/.next/standalone ./ cached
+0ms
+
+production
+RUN chown -R nextjs:nodejs /app cached
+0ms
+
+deps
+COPY package.json package-lock.json* ./ cached
+0ms
+
+auth
+sharing credentials for production-us-west2.railway-registry.com
+0ms
+
+importing to docker
+1s
+Build time: 9.83 seconds
+ 
+====================
+Starting Healthcheck
+====================
+Path: /
+Retry window: 1m40s
+ 
+[1/1] Healthcheck succeeded!
