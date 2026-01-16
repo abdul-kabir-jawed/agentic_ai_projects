@@ -8,13 +8,21 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
   },
-  // Webpack configuration for path aliases
+  // Webpack configuration for path aliases (fallback for webpack mode)
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname, './src'),
     };
     return config;
+  },
+  // Turbopack configuration (Next.js 16 default)
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        '@': path.resolve(__dirname, './src'),
+      },
+    },
   },
   // Allow external image domains if needed
   images: {
