@@ -7,6 +7,7 @@ name = "evolution-todo-backend"
 version = "0.2.0"
 description = "FastAPI backend for Evolution of Todo - Phase II"
 authors = ["AI Team <ai@example.com>"]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"

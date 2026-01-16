@@ -56,10 +56,10 @@ jobs:
         run: |
           pip install poetry
           if [ -f poetry.lock ]; then
-            poetry install --no-interaction
+            poetry install --no-interaction --no-root
           else
             poetry lock
-            poetry install --no-interaction
+            poetry install --no-interaction --no-root
           fi
 
       - name: Run backend tests
