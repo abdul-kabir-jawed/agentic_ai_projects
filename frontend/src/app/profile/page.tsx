@@ -409,10 +409,9 @@ function ProfileContent() {
               {/* User Info */}
               <div className="mb-6">
                 <h3 className="text-2xl font-serif font-medium text-text-primary mb-1">
-                  {user.full_name || user.username}
+                  {user.full_name || user.email.split('@')[0]}
                 </h3>
-                <p className="text-sm text-gold font-medium mb-1">@{user.username}</p>
-                <p className="text-xs text-text-tertiary">{user.email}</p>
+                <p className="text-sm text-gold font-medium">{user.email}</p>
               </div>
 
               {/* Member Since */}
