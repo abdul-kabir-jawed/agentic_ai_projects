@@ -119,7 +119,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('[AUTH] Registration successful via Better Auth');
-      // Don't auto-login after registration - let user login manually
+
+      // Sign out immediately after registration to prevent auto-login
+      // User must verify email and login manually
+      try {
+        await authClient.signOut();
+        setUser(null);
+        setToken(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('authToken');
+        }
+        console.log('[AUTH] Signed out after registration - user must login manually');
+      } catch (signOutError) {
+        console.log('[AUTH] Sign out after registration failed (may already be signed out)');
+      }
     } catch (error) {
       if (error instanceof Error) {
         throw error;

@@ -23,7 +23,7 @@ class BetterAuthUser:
 
 
 def validate_better_auth_session(token: str, session: Session) -> Optional[BetterAuthUser]:
-    """Validate a Better Auth session token against neon_auth schema.
+    """Validate a Better Auth session token against public schema.
 
     Args:
         token: Better Auth session token
@@ -38,15 +38,15 @@ def validate_better_auth_session(token: str, session: Session) -> Optional[Bette
         return None
 
     try:
-        # Query neon_auth.session to validate token and get user creation date
-        # Note: Better Auth uses camelCase column names (createdAt, not created_at)
+        # Query public.session to validate token and get user info
+        # Better Auth uses camelCase column names (userId, expiresAt, createdAt)
         result = session.execute(
             text("""
-                SELECT s.user_id, u.id, u.name, u.email, u."createdAt"
-                FROM neon_auth.session s
-                JOIN neon_auth."user" u ON s.user_id = u.id
+                SELECT s."userId", u.id, u.name, u.email, u."createdAt"
+                FROM "session" s
+                JOIN "user" u ON s."userId" = u.id
                 WHERE s.token = :token
-                AND s.expires_at > NOW()
+                AND s."expiresAt" > NOW()
             """),
             {"token": token}
         )
@@ -60,7 +60,7 @@ def validate_better_auth_session(token: str, session: Session) -> Optional[Bette
                 else:
                     # If it's a datetime object, convert to ISO string
                     created_at = row[4].isoformat() if hasattr(row[4], 'isoformat') else str(row[4])
-            
+
             return BetterAuthUser(
                 id=row[1],  # u.id
                 email=row[3],  # u.email
