@@ -37,9 +37,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${baseUrl}/verify-email?error=missing_params`);
     }
 
-    // Look up the verification token
+    // Look up the verification token (Better Auth uses public schema with "token" column)
     const tokenResult = await pool.query(
-      'SELECT * FROM neon_auth.verification WHERE identifier = $1 AND value = $2',
+      'SELECT * FROM "verification" WHERE identifier = $1 AND token = $2',
       [email, token]
     );
 
@@ -50,20 +50,20 @@ export async function GET(request: NextRequest) {
 
     const verification = tokenResult.rows[0];
 
-    // Check if token is expired
-    if (new Date(verification.expires_at) < new Date()) {
+    // Check if token is expired (column is "expiresAt" in public schema)
+    if (new Date(verification.expiresAt) < new Date()) {
       console.log("[CUSTOM-VERIFY] Token expired");
       // Delete expired token
       await pool.query(
-        'DELETE FROM neon_auth.verification WHERE identifier = $1',
+        'DELETE FROM "verification" WHERE identifier = $1',
         [email]
       );
       return NextResponse.redirect(`${baseUrl}/verify-email?error=token_expired`);
     }
 
-    // Update user's emailVerified status
+    // Update user's emailVerified status (Better Auth uses public schema)
     const updateResult = await pool.query(
-      'UPDATE neon_auth."user" SET "emailVerified" = true, "updatedAt" = NOW() WHERE email = $1 RETURNING id',
+      'UPDATE "user" SET "emailVerified" = true, "updatedAt" = NOW() WHERE email = $1 RETURNING id',
       [email]
     );
 
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
 
     // Delete the used verification token
     await pool.query(
-      'DELETE FROM neon_auth.verification WHERE identifier = $1',
+      'DELETE FROM "verification" WHERE identifier = $1',
       [email]
     );
 

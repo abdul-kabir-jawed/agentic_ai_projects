@@ -41,9 +41,9 @@ export async function POST(request: NextRequest) {
 
     console.log(`[VERIFY-EMAIL] Sending verification email to: ${email}`);
 
-    // Find the user by email
+    // Find the user by email (Better Auth uses public schema)
     const userResult = await pool.query(
-      'SELECT id, name, "emailVerified" FROM neon_auth."user" WHERE email = $1',
+      'SELECT id, name, "emailVerified" FROM "user" WHERE email = $1',
       [email]
     );
 
@@ -68,15 +68,15 @@ export async function POST(request: NextRequest) {
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Delete any existing verification tokens for this email
+    // Delete any existing verification tokens for this email (Better Auth uses public schema)
     await pool.query(
-      'DELETE FROM neon_auth.verification WHERE identifier = $1',
+      'DELETE FROM "verification" WHERE identifier = $1',
       [email]
     );
 
-    // Insert new verification token
+    // Insert new verification token (Better Auth uses public schema with "token" column)
     await pool.query(
-      'INSERT INTO neon_auth.verification (id, identifier, value, expires_at, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, NOW(), NOW())',
+      'INSERT INTO "verification" (id, identifier, token, "expiresAt", "createdAt") VALUES ($1, $2, $3, $4, NOW())',
       [crypto.randomUUID(), email, token, expiresAt]
     );
 
