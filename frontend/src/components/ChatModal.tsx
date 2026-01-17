@@ -681,8 +681,8 @@ export function ChatModal() {
             )}
 
             {/* Input Area - Gold Theme */}
-            <div className="border-t border-white/10 bg-surface/50 backdrop-blur-xl p-4 md:p-5">
-              <div className="flex gap-2">
+            <div className="border-t border-white/10 bg-surface/50 backdrop-blur-xl p-3 md:p-5">
+              <div className="flex gap-1.5 md:gap-2">
                 <input
                   type="text"
                   value={voiceState === 'listening' ? interimTranscript : input}
@@ -694,12 +694,12 @@ export function ChatModal() {
                   }}
                   placeholder={
                     canUseChat === false
-                      ? 'Configure API keys in Settings to use chat...'
+                      ? 'Configure API keys in Settings...'
                       : voiceState === 'listening'
                       ? 'Listening...'
                       : 'Ask me to create, list, or complete tasks...'
                   }
-                  className="flex-1 px-4 py-3 rounded-xl bg-elevated border border-white/10 text-text-primary placeholder-text-tertiary focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/20 transition-all text-sm disabled:opacity-50"
+                  className="flex-1 min-w-0 px-3 md:px-4 py-2.5 md:py-3 rounded-xl bg-elevated border border-white/10 text-text-primary placeholder-text-tertiary focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/20 transition-all text-sm disabled:opacity-50"
                   disabled={isSending || voiceState === 'listening' || canUseChat === false}
                 />
 
@@ -708,7 +708,7 @@ export function ChatModal() {
                   <button
                     onClick={toggleVoiceRecognition}
                     disabled={isSending || voiceState === 'processing' || canUseChat === false}
-                    className={`px-4 py-3 rounded-xl transition-all ${
+                    className={`flex-shrink-0 px-3 md:px-4 py-2.5 md:py-3 rounded-xl transition-all ${
                       voiceState === 'listening'
                         ? 'bg-rose/20 border border-rose/50 text-rose animate-pulse'
                         : voiceState === 'error'
@@ -727,7 +727,7 @@ export function ChatModal() {
                 <button
                   onClick={() => handleSendMessage(input)}
                   disabled={isSending || !input.trim() || voiceState === 'listening' || canUseChat === false}
-                  className="px-4 py-3 rounded-xl btn-gold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="flex-shrink-0 px-3 md:px-4 py-2.5 md:py-3 rounded-xl btn-gold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   <Icon icon="lucide:send" className="w-4 h-4 text-void" />
                 </button>

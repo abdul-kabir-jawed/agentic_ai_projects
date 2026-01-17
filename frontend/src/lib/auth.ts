@@ -16,6 +16,7 @@ import { neonConfig, neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "@/db/schema";
 import ws from "ws";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 // Configure Neon for Node.js environment
 if (typeof window === "undefined") {
@@ -58,6 +59,10 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // Set to true if you want email verification
+    sendResetPassword: async ({ user, url }) => {
+      // Send password reset email using our email service
+      await sendPasswordResetEmail(user.email, user.name || "", url);
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
