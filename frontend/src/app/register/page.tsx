@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { taskAPI } from '@/services/api';
 import toast, { Toaster } from 'react-hot-toast';
 
 type PasswordStrength = 'weak' | 'medium' | 'strong';

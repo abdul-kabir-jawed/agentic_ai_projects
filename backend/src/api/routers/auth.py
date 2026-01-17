@@ -19,6 +19,7 @@ from src.api.schemas.auth import (
     PasswordResetComplete,
     PasswordResetResponse,
     UserSync,
+    ProfileSync,
     BetterAuthUserResponse,
     ApiKeyUpdateRequest,
     ApiKeyStatusResponse,
@@ -165,21 +166,35 @@ async def logout(
 @router.get("/me", response_model=BetterAuthUserResponse)
 async def get_current_user_profile(
     current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_session)],
 ):
     """Get current user profile.
 
     Args:
         current_user: Authenticated user from token (BetterAuthUser)
+        session: Database session
 
     Returns:
-        Current user data
+        Current user data with stored username and full name
     """
     try:
         # Convert BetterAuthUser to BetterAuthUserResponse
         user_id = str(current_user.id) if current_user.id else ""
         user_email = str(current_user.email) if current_user.email else ""
-        user_name = str(current_user.name) if hasattr(current_user, 'name') and current_user.name else None
-        username = user_email.split('@')[0] if user_email else ""
+
+        # Get stored profile data from user_data table
+        repo = UserDataRepository(session)
+        user_data = repo.get_by_user_id(user_id)
+
+        # Use stored username/name if available, otherwise fallback
+        if user_data:
+            username = user_data.username or user_email.split('@')[0]
+            user_name = user_data.name
+            has_api_keys = user_data.has_api_keys()
+        else:
+            username = user_email.split('@')[0]
+            user_name = str(current_user.name) if hasattr(current_user, 'name') and current_user.name else None
+            has_api_keys = False
 
         # Get created_at from Better Auth user if available
         created_at = None
@@ -198,6 +213,7 @@ async def get_current_user_profile(
             username=username,
             profile_picture_url=None,
             is_active=True,
+            has_api_keys=has_api_keys,
             created_at=created_at,
             updated_at=updated_at,
         )
@@ -206,6 +222,59 @@ async def get_current_user_profile(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error processing user profile: {str(e)}",
+        )
+
+
+@router.post("/me/profile", response_model=BetterAuthUserResponse)
+async def sync_user_profile(
+    profile_data: ProfileSync,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_session)],
+):
+    """Sync user profile data (username and full name) after Better Auth registration.
+
+    Args:
+        profile_data: Profile data to sync
+        current_user: Authenticated user from token
+        session: Database session
+
+    Returns:
+        Updated user profile
+    """
+    try:
+        user_id = str(current_user.id) if current_user.id else ""
+        user_email = str(current_user.email) if current_user.email else ""
+
+        # Store profile data in user_data table
+        repo = UserDataRepository(session)
+        user_data = repo.update_profile(
+            user_id=user_id,
+            email=user_email,
+            name=profile_data.full_name,
+            username=profile_data.username,
+        )
+
+        # Get created_at from Better Auth user
+        created_at = None
+        if hasattr(current_user, 'created_at') and current_user.created_at:
+            created_at = current_user.created_at
+
+        return BetterAuthUserResponse(
+            id=user_id,
+            email=user_email,
+            name=user_data.name,
+            username=user_data.username,
+            profile_picture_url=None,
+            is_active=True,
+            has_api_keys=user_data.has_api_keys(),
+            created_at=created_at,
+            updated_at=user_data.updated_at,
+        )
+    except Exception as e:
+        print(f"[AUTH] Error in sync_user_profile: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error syncing profile: {str(e)}",
         )
 
 

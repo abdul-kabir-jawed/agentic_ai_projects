@@ -10,10 +10,11 @@ import { taskAPI } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UserProfile {
-  id: number;
+  id: number | string;
   email: string;
   username: string;
-  full_name?: string;
+  name?: string;  // Full name from backend
+  full_name?: string;  // Alias for compatibility
   profile_picture_url?: string;
   is_active: boolean;
   created_at: string;
@@ -409,9 +410,10 @@ function ProfileContent() {
               {/* User Info */}
               <div className="mb-6">
                 <h3 className="text-2xl font-serif font-medium text-text-primary mb-1">
-                  {user.full_name || user.email.split('@')[0]}
+                  {user.name || user.full_name || user.username}
                 </h3>
-                <p className="text-sm text-gold font-medium">{user.email}</p>
+                <p className="text-sm text-gold font-medium mb-1">@{user.username}</p>
+                <p className="text-xs text-text-tertiary">{user.email}</p>
               </div>
 
               {/* Member Since */}

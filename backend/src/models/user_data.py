@@ -119,7 +119,8 @@ class UserData(SQLModel, table=True):
 
     # User info (cached from neon_auth for convenience)
     email: str = Field(index=True)
-    name: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)  # Full name
+    username: Optional[str] = Field(default=None, index=True)  # Username (handle)
 
     # Tasks stored as JSONB array
     # Each task: {id, description, priority, tags, due_date, is_completed, is_daily, created_at, updated_at}

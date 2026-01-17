@@ -113,6 +113,13 @@ class UserSync(BaseModel):
     full_name: Optional[str] = Field(None, max_length=100)
 
 
+class ProfileSync(BaseModel):
+    """Schema for syncing profile data after Better Auth registration."""
+
+    username: str = Field(..., min_length=3, max_length=50)
+    full_name: Optional[str] = Field(None, max_length=100)
+
+
 class BetterAuthUserResponse(BaseModel):
     """Schema for Better Auth user response (simplified)."""
 

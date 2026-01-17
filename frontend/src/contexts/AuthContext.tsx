@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authClient } from '@/lib/auth-client';
+import { taskAPI } from '@/services/api';
 
 export interface User {
   id: string;
@@ -119,6 +120,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('[AUTH] Registration successful via Better Auth');
+
+      // Sync profile data to backend (username and full name) while still authenticated
+      try {
+        // Get session to store token temporarily
+        const session = await authClient.getSession();
+        if (session?.data?.session?.token) {
+          localStorage.setItem('authToken', session.data.session.token);
+          console.log('[AUTH] Syncing profile data to backend...');
+          await taskAPI.syncProfile(username, fullName);
+          console.log('[AUTH] Profile synced successfully');
+        }
+      } catch (syncError) {
+        console.error('[AUTH] Failed to sync profile (non-blocking):', syncError);
+        // Non-blocking - user can update profile later
+      }
 
       // Sign out immediately after registration to prevent auto-login
       // User must verify email and login manually

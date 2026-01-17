@@ -215,6 +215,14 @@ class TaskAPI {
     return data;
   }
 
+  async syncProfile(username: string, fullName?: string): Promise<UserProfile> {
+    const { data } = await this.client.post<UserProfile>('/auth/me/profile', {
+      username,
+      full_name: fullName,
+    });
+    return data;
+  }
+
   async checkChatApiKeyAccess(): Promise<{
     has_api_keys: boolean;
     gemini_configured: boolean;

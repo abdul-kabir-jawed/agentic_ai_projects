@@ -19,13 +19,14 @@ class UserDataRepository:
         """
         self.session = session
 
-    def get_or_create(self, user_id: str, email: str, name: Optional[str] = None) -> UserData:
+    def get_or_create(self, user_id: str, email: str, name: Optional[str] = None, username: Optional[str] = None) -> UserData:
         """Get existing user data or create new record.
 
         Args:
             user_id: Better Auth user ID
             email: User email
-            name: User name
+            name: User full name
+            username: User username/handle
 
         Returns:
             UserData instance
@@ -39,6 +40,7 @@ class UserDataRepository:
                 user_id=user_id,
                 email=email,
                 name=name,
+                username=username,
                 tasks=[],
                 ai_chats=[],
                 api_keys=ApiKeysItem.create(),
@@ -48,6 +50,32 @@ class UserDataRepository:
             self.session.refresh(user_data)
             print(f"[USER_DATA_REPO] Created user_data with ID: {user_data.id}")
 
+        return user_data
+
+    def update_profile(self, user_id: str, email: str, name: Optional[str] = None, username: Optional[str] = None) -> UserData:
+        """Update user profile data.
+
+        Args:
+            user_id: Better Auth user ID
+            email: User email
+            name: User full name
+            username: User username/handle
+
+        Returns:
+            Updated UserData instance
+        """
+        user_data = self.get_or_create(user_id, email, name, username)
+
+        # Update fields if provided
+        if name is not None:
+            user_data.name = name
+        if username is not None:
+            user_data.username = username
+        if email:
+            user_data.email = email
+
+        self.save(user_data)
+        print(f"[USER_DATA_REPO] Updated profile for user_id: {user_id}")
         return user_data
 
     def get_by_user_id(self, user_id: str) -> Optional[UserData]:
