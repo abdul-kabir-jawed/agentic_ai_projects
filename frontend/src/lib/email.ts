@@ -16,16 +16,23 @@ const EMAIL_USER = process.env.EMAIL_USER || "";
 const EMAIL_PASS = process.env.EMAIL_PASS || "";
 const EMAIL_FROM = process.env.EMAIL_FROM || "Evolution of Todo <noreply@evolutionoftodo.com>";
 
-// Create reusable transporter
-const transporter = nodemailer.createTransport({
-  host: EMAIL_HOST,
-  port: EMAIL_PORT,
-  secure: EMAIL_PORT === 465,
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS,
-  },
-});
+// Lazy transporter creation to avoid errors when credentials aren't set
+let transporter: nodemailer.Transporter | null = null;
+
+const getTransporter = () => {
+  if (!transporter && EMAIL_USER && EMAIL_PASS) {
+    transporter = nodemailer.createTransport({
+      host: EMAIL_HOST,
+      port: EMAIL_PORT,
+      secure: EMAIL_PORT === 465,
+      auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS,
+      },
+    });
+  }
+  return transporter;
+};
 
 // Base email template with Evolution of Todo branding
 const baseTemplate = (content: string) => `
@@ -297,7 +304,13 @@ export async function sendEmail({
   }
 
   try {
-    const info = await transporter.sendMail({
+    const emailTransporter = getTransporter();
+    if (!emailTransporter) {
+      console.log("[EMAIL] Email transporter not available");
+      return { success: false, message: "Email transporter not configured" };
+    }
+
+    const info = await emailTransporter.sendMail({
       from: EMAIL_FROM,
       to,
       subject,

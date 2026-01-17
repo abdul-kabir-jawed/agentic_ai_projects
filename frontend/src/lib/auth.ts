@@ -61,7 +61,15 @@ export const auth = betterAuth({
     requireEmailVerification: false, // Set to true if you want email verification
     sendResetPassword: async ({ user, url }) => {
       // Send password reset email using our email service
-      await sendPasswordResetEmail(user.email, user.name || "", url);
+      try {
+        await sendPasswordResetEmail(user.email, user.name || "", url);
+        console.log(`[AUTH] Password reset email sent to ${user.email}`);
+      } catch (error) {
+        // Log error but don't throw - allows password reset flow to continue
+        // The reset token is still created in the database
+        console.error("[AUTH] Failed to send password reset email:", error);
+        console.log(`[AUTH] Password reset URL for ${user.email}: ${url}`);
+      }
     },
   },
   session: {
