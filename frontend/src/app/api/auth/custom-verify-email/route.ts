@@ -37,9 +37,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${baseUrl}/verify-email?error=missing_params`);
     }
 
-    // Look up the verification token (Better Auth uses public schema with "token" column)
+    // Look up the verification token (Better Auth uses public schema with "value" column)
     const tokenResult = await pool.query(
-      'SELECT * FROM "verification" WHERE identifier = $1 AND token = $2',
+      'SELECT * FROM "verification" WHERE identifier = $1 AND value = $2',
       [email, token]
     );
 

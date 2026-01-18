@@ -121,6 +121,7 @@ class UserData(SQLModel, table=True):
     email: str = Field(index=True)
     name: Optional[str] = Field(default=None)  # Full name
     username: Optional[str] = Field(default=None, index=True)  # Username (handle)
+    profile_picture_url: Optional[str] = Field(default=None)  # Base64 encoded image or URL
 
     # Tasks stored as JSONB array
     # Each task: {id, description, priority, tags, due_date, is_completed, is_daily, created_at, updated_at}

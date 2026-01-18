@@ -74,9 +74,9 @@ export async function POST(request: NextRequest) {
       [email]
     );
 
-    // Insert new verification token (Better Auth uses public schema with "token" column)
+    // Insert new verification token (Better Auth uses public schema with "value" column)
     await pool.query(
-      'INSERT INTO "verification" (id, identifier, token, "expiresAt", "createdAt") VALUES ($1, $2, $3, $4, NOW())',
+      'INSERT INTO "verification" (id, identifier, value, "expiresAt", "createdAt") VALUES ($1, $2, $3, $4, NOW())',
       [crypto.randomUUID(), email, token, expiresAt]
     );
 

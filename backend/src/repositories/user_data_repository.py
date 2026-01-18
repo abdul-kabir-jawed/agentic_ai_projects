@@ -529,3 +529,61 @@ class UserDataRepository:
         self.save(user_data)
         print(f"[USER_DATA_REPO] Deleted API keys for user {user_id}")
         return True
+
+    # ============ PROFILE PICTURE OPERATIONS ============
+
+    def update_profile_picture(
+        self,
+        user_id: str,
+        email: str,
+        image_data: str,
+        name: Optional[str] = None,
+    ) -> UserData:
+        """Update user's profile picture.
+
+        Args:
+            user_id: Better Auth user ID
+            email: User email
+            image_data: Base64 encoded image data
+            name: User name
+
+        Returns:
+            Updated UserData instance
+        """
+        user_data = self.get_or_create(user_id, email, name)
+        user_data.profile_picture_url = image_data
+        self.save(user_data)
+        print(f"[USER_DATA_REPO] Updated profile picture for user {user_id}")
+        return user_data
+
+    def delete_profile_picture(self, user_id: str) -> Optional[UserData]:
+        """Delete user's profile picture.
+
+        Args:
+            user_id: Better Auth user ID
+
+        Returns:
+            Updated UserData instance or None if user not found
+        """
+        user_data = self.get_by_user_id(user_id)
+        if not user_data:
+            return None
+
+        user_data.profile_picture_url = None
+        self.save(user_data)
+        print(f"[USER_DATA_REPO] Deleted profile picture for user {user_id}")
+        return user_data
+
+    def get_profile_picture(self, user_id: str) -> Optional[str]:
+        """Get user's profile picture.
+
+        Args:
+            user_id: Better Auth user ID
+
+        Returns:
+            Profile picture URL/base64 or None
+        """
+        user_data = self.get_by_user_id(user_id)
+        if not user_data:
+            return None
+        return user_data.profile_picture_url

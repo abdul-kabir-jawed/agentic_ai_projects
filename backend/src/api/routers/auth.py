@@ -191,10 +191,12 @@ async def get_current_user_profile(
             username = user_data.username or user_email.split('@')[0]
             user_name = user_data.name
             has_api_keys = user_data.has_api_keys()
+            profile_picture_url = user_data.profile_picture_url
         else:
             username = user_email.split('@')[0]
             user_name = str(current_user.name) if hasattr(current_user, 'name') and current_user.name else None
             has_api_keys = False
+            profile_picture_url = None
 
         # Get created_at from Better Auth user if available
         created_at = None
@@ -211,7 +213,7 @@ async def get_current_user_profile(
             email=user_email,
             name=user_name,
             username=username,
-            profile_picture_url=None,
+            profile_picture_url=profile_picture_url,
             is_active=True,
             has_api_keys=has_api_keys,
             created_at=created_at,
@@ -264,7 +266,7 @@ async def sync_user_profile(
             email=user_email,
             name=user_data.name,
             username=user_data.username,
-            profile_picture_url=None,
+            profile_picture_url=user_data.profile_picture_url,
             is_active=True,
             has_api_keys=user_data.has_api_keys(),
             created_at=created_at,
@@ -320,7 +322,7 @@ async def get_user_stats(
     return user_service.get_user_stats(current_user.id)
 
 
-@router.post("/me/avatar", response_model=UserResponse)
+@router.post("/me/avatar", response_model=BetterAuthUserResponse)
 async def upload_avatar(
     avatar_data: AvatarUploadRequest,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -339,12 +341,39 @@ async def upload_avatar(
     Raises:
         HTTPException: If image data is invalid
     """
-    user_service = UserService(session)
-    updated_user = user_service.upload_avatar(current_user.id, avatar_data.image_data)
-    return UserResponse.model_validate(updated_user)
+    try:
+        user_id = str(current_user.id) if current_user.id else ""
+        user_email = str(current_user.email) if current_user.email else ""
+        user_name = str(current_user.name) if hasattr(current_user, 'name') and current_user.name else None
+
+        repo = UserDataRepository(session)
+        user_data = repo.update_profile_picture(
+            user_id=user_id,
+            email=user_email,
+            image_data=avatar_data.image_data,
+            name=user_name,
+        )
+
+        return BetterAuthUserResponse(
+            id=user_id,
+            email=user_email,
+            name=user_data.name,
+            username=user_data.username or user_email.split('@')[0],
+            profile_picture_url=user_data.profile_picture_url,
+            is_active=True,
+            has_api_keys=user_data.has_api_keys(),
+            created_at=user_data.created_at,
+            updated_at=user_data.updated_at,
+        )
+    except Exception as e:
+        print(f"[AUTH] Error uploading avatar: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error uploading avatar: {str(e)}",
+        )
 
 
-@router.delete("/me/avatar", response_model=UserResponse)
+@router.delete("/me/avatar", response_model=BetterAuthUserResponse)
 async def delete_avatar(
     current_user: Annotated[User, Depends(get_current_user)],
     session: Annotated[Session, Depends(get_session)],
@@ -358,9 +387,38 @@ async def delete_avatar(
     Returns:
         Updated user data with avatar removed
     """
-    user_service = UserService(session)
-    updated_user = user_service.delete_avatar(current_user.id)
-    return UserResponse.model_validate(updated_user)
+    try:
+        user_id = str(current_user.id) if current_user.id else ""
+        user_email = str(current_user.email) if current_user.email else ""
+
+        repo = UserDataRepository(session)
+        user_data = repo.delete_profile_picture(user_id)
+
+        if not user_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+
+        return BetterAuthUserResponse(
+            id=user_id,
+            email=user_email,
+            name=user_data.name,
+            username=user_data.username or user_email.split('@')[0],
+            profile_picture_url=None,
+            is_active=True,
+            has_api_keys=user_data.has_api_keys(),
+            created_at=user_data.created_at,
+            updated_at=user_data.updated_at,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[AUTH] Error deleting avatar: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting avatar: {str(e)}",
+        )
 
 
 @router.post("/forgot-password", response_model=PasswordResetResponse, status_code=status.HTTP_200_OK)

@@ -56,9 +56,10 @@ export const account = pgTable("account", {
 export const verification = pgTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(), // email or similar
-  token: text("token").notNull().unique(),
+  value: text("value").notNull().unique(), // Better Auth expects "value" not "token"
   expiresAt: timestamp("expiresAt").notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt"),
 });
 
 /**
