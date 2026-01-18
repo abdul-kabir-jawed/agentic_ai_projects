@@ -26,7 +26,7 @@ class TaskUpdate(BaseModel):
 
     description: Optional[str] = Field(None, min_length=1, max_length=500)
     priority: Optional[str] = Field(None, pattern="^(low|medium|high)$")
-    tags: Optional[List[str]] = None
+    tags: Optional[str] = None  # Comma-separated string, consistent with TaskCreate
     due_date: Optional[datetime] = None
     is_daily: Optional[bool] = None
     is_completed: Optional[bool] = None

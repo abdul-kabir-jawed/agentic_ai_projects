@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { taskAPI } from '@/services/api';
 import toast, { Toaster } from 'react-hot-toast';
 
 type PasswordStrength = 'weak' | 'medium' | 'strong';
@@ -23,11 +22,6 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
-  
-  // API Key fields (optional)
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [openaiApiKey, setOpenaiApiKey] = useState('');
-  const [showApiKeys, setShowApiKeys] = useState(false);
 
   const router = useRouter();
   const { register, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -72,39 +66,6 @@ export default function RegisterPage() {
 
     try {
       await register(email, username, password, fullName);
-
-      // Save API keys if provided (after user is created)
-      if (geminiApiKey || openaiApiKey) {
-        try {
-          // Wait a bit for Better Auth to complete registration
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Get the session token from localStorage (set by AuthContext after registration)
-          const token = localStorage.getItem('authToken');
-          if (token) {
-            const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const API_BASE_PATH = process.env.NEXT_PUBLIC_API_BASE_PATH || '/api/v1';
-            const API_URL = `${API_BASE}${API_BASE_PATH}`;
-            
-            await fetch(`${API_URL}/auth/me/api-keys`, {
-              method: 'PUT',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                gemini_api_key: geminiApiKey || undefined,
-                openai_api_key: openaiApiKey || undefined,
-              }),
-            });
-            console.log('[REGISTER] API keys saved successfully');
-          }
-        } catch (apiKeyErr) {
-          console.error('Failed to save API keys:', apiKeyErr);
-          // Don't fail registration if API key save fails - user can add them later
-          toast.error('Account created, but API keys could not be saved. You can add them in your profile.');
-        }
-      }
 
       // Explicitly send verification email after registration
       try {
@@ -319,69 +280,6 @@ export default function RegisterPage() {
                 <p className={`text-xs mt-1 ${passwordsMatch ? 'text-green-500' : 'text-rose'}`}>
                   {passwordsMatch ? 'Passwords match!' : 'Passwords do not match'}
                 </p>
-              )}
-            </div>
-
-            {/* API Keys Section (Optional) */}
-            <div className="form-group">
-              <div className="flex items-center justify-between mb-2">
-                <label className="form-label">API Keys <span className="text-text-tertiary">(optional)</span></label>
-                <button
-                  type="button"
-                  onClick={() => setShowApiKeys(!showApiKeys)}
-                  className="text-sm text-gold hover:text-gold-bright transition-colors flex items-center gap-1"
-                >
-                  <Icon icon={showApiKeys ? 'lucide:chevron-up' : 'lucide:chevron-down'} className="w-4 h-4" />
-                  <span>{showApiKeys ? 'Hide' : 'Show'}</span>
-                </button>
-              </div>
-              {showApiKeys && (
-                <div className="space-y-4 p-4 bg-white/5 rounded-lg border border-white/10">
-                  <p className="text-xs text-text-tertiary mb-3">
-                    Add your API keys to use AI chat features. You can also add them later in your profile.
-                  </p>
-                  
-                  {/* Gemini API Key */}
-                  <div>
-                    <label className="text-sm text-text-secondary mb-1.5 block">Gemini API Key</label>
-                    <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none">
-                        <Icon icon="lucide:key" className="w-4 h-4" />
-                      </div>
-                      <input
-                        type="password"
-                        value={geminiApiKey}
-                        onChange={(e) => setGeminiApiKey(e.target.value)}
-                        placeholder="Enter your Gemini API key (optional)"
-                        className="input-gold pl-10 text-sm"
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                  </div>
-
-                  {/* OpenAI API Key */}
-                  <div>
-                    <label className="text-sm text-text-secondary mb-1.5 block">OpenAI API Key</label>
-                    <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none">
-                        <Icon icon="lucide:key" className="w-4 h-4" />
-                      </div>
-                      <input
-                        type="password"
-                        value={openaiApiKey}
-                        onChange={(e) => setOpenaiApiKey(e.target.value)}
-                        placeholder="Enter your OpenAI API key (optional)"
-                        className="input-gold pl-10 text-sm"
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                  </div>
-                  
-                  <p className="text-xs text-text-tertiary mt-2">
-                    <Icon icon="lucide:shield-check" className="w-3 h-3 inline mr-1" />
-                    Your API keys are encrypted and stored securely. They are only used for AI chat features.
-                  </p>
-                </div>
               )}
             </div>
 

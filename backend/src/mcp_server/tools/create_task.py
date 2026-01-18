@@ -9,7 +9,7 @@ class CreateTaskInput(BaseModel):
     """Input for create_task tool."""
     description: str
     priority: Optional[str] = "medium"
-    tags: Optional[list[str]] = None
+    tags: Optional[str] = None  # Comma-separated string, consistent with API
     due_date: Optional[str] = None
 
 
@@ -18,7 +18,7 @@ class CreateTaskOutput(BaseModel):
     id: str
     description: str
     priority: str
-    tags: list[str]
+    tags: Optional[str] = None  # Comma-separated string
     due_date: Optional[str]
     is_completed: bool
     created_at: str
@@ -27,7 +27,7 @@ class CreateTaskOutput(BaseModel):
 async def create_task(
     description: str,
     priority: str = "medium",
-    tags: Optional[list[str]] = None,
+    tags: Optional[str] = None,
     due_date: Optional[str] = None,
     api_base_url: str = "http://localhost:8000"
 ) -> CreateTaskOutput:
@@ -37,7 +37,7 @@ async def create_task(
     Args:
         description: Task description (required)
         priority: Task priority (low, medium, high)
-        tags: List of tags for the task
+        tags: Comma-separated tags for the task (e.g., "work, urgent")
         due_date: Due date in ISO format (YYYY-MM-DD)
         api_base_url: Base URL for the backend API
 
@@ -51,7 +51,7 @@ async def create_task(
         payload = {
             "description": description,
             "priority": priority,
-            "tags": tags or [],
+            "tags": tags.strip() if tags else None,
             "due_date": due_date
         }
 
