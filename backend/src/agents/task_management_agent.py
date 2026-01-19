@@ -363,6 +363,7 @@ async def update_my_task(
     description: Optional[str] = None,
     priority: Optional[str] = None,
     due_date: Optional[str] = None,
+    tags: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Update an existing task by ID or description.
@@ -370,7 +371,7 @@ async def update_my_task(
     IMPORTANT: You can use either:
     - Task ID (UUID string like "abc12345")
     - Task description (e.g., "swimming", "homework", "buy groceries")
-    
+
     The tool will automatically find the task by description if ID is not provided.
 
     Args:
@@ -378,6 +379,7 @@ async def update_my_task(
         description: New description (1-500 chars)
         priority: New priority ('high', 'medium', 'low')
         due_date: New due date (YYYY-MM-DD or natural language)
+        tags: New comma-separated tags (e.g., "work, urgent, project")
 
     Returns:
         dict containing the updated task
@@ -388,16 +390,17 @@ async def update_my_task(
             "success": False,
             "message": "Task operations not available. Please try again."
         }
-    
+
     # Validate and parse inputs
     if priority:
         priority = PriorityValidator.validate(priority)
-    
+
     return task_ops.update_task(
         task_id_or_description=str(task_id_or_description),
         description=description,
         priority=priority,
         due_date=due_date,
+        tags=tags.strip() if tags else None,
     )
 
 
@@ -638,7 +641,7 @@ YOUR CAPABILITIES - REAL TASK OPERATIONS:
   * For DATED tasks: pass natural language due_date (tomorrow, today, next week)
 - LIST TASKS: Use list_my_tasks to show actual tasks
 - COMPLETE TASKS: Use complete_my_task(task_id_or_description) - can use task description
-- UPDATE TASKS: Use update_my_task(task_id_or_description, ...) - can use task description
+- UPDATE TASKS: Use update_my_task(task_id_or_description, ...) - can update description, priority, due_date, tags
 - DELETE TASKS: Use delete_my_task(task_id_or_description) - can use task description
   * IMPORTANT: You can use task descriptions (e.g., "swimming", "homework") instead of IDs
   * The tool will automatically find tasks by matching descriptions
@@ -657,6 +660,8 @@ EXAMPLES (follow these patterns EXACTLY):
 - "update swimming description to swimming everyday" -> update_my_task("swimming", description="swimming everyday")
 - "delete the hi task" -> delete_my_task("hi")
 - "update homework priority to high" -> update_my_task("homework", priority="high")
+- "update task tags to work, urgent" -> update_my_task("task", tags="work, urgent")
+- "change my project task tags to institute projects" -> update_my_task("project", tags="institute projects")
 
 RESPONSE GUIDELINES:
 - For task creation: Create it and confirm with task ID
